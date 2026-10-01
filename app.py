@@ -33,7 +33,7 @@ api_key = os.getenv("ELEVENLABS_API_KEY", "YOUR_ACTUAL_API_KEY_HERE")
 elevenlabs = ElevenLabs(api_key=api_key)
 translator = Translator()
 
-# వాయిస్ IDs (മനുషులు మాట్లాడే విధంగా ఉండే టాప్ వాయిస్స్ & మీ ఓన్ వాయిస్ ID ఇక్కడ పెట్టుకోవచ్చు)
+# వాయిస్ IDs
 VOICE_MAP = {
     "ప్రశాంతమైన మగ వాయిస్ (George - Natural)": "JBFqnCBsd6RMkjVDRZzb",
     "ప్రొఫెషనల్ న్యూస్ వాయిస్ (Adam)": "21m00Tcm4TlvDq8ikWAM",
@@ -99,7 +99,7 @@ if st.button("🚀 టెక్స్ట్ అనువదించి, వా�
                 audio_stream = elevenlabs.text_to_speech.convert(
                     text=translated_text,
                     voice_id=voice_id,
-                    model_id="eleven_multilingual_v2",  // బహుళ భాషలను అద్భుతంగా సపోర్ట్ చేస్తుంది
+                    model_id="eleven_multilingual_v2",  # బహుళ భాషలను అద్భుతంగా సపోర్ట్ చేస్తుంది
                     output_format="mp3_44100_128",
                 )
                 

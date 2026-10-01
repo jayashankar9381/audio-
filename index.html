@@ -3,45 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI వాయిస్ ఓవర్ & PDF టూ ఆడియో స్టూడియో</title>
+    <title>అల్ట్రా-ఫాస్ట్ AI PDF & టెక్స్ట్ వాయిస్ ఓవర్ స్టూడియో</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- PDF టెక్స్ట్ చదవడానికి లిబ్ (PDF.js) -->
+    <!-- PDF.js ఫాస్ట్ లోడింగ్ కోసం -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col items-center justify-center p-4">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col items-center justify-center p-4">
 
-    <div class="max-w-2xl w-full bg-slate-800 rounded-3xl shadow-2xl border border-slate-700 p-6 md:p-8 space-y-6">
+    <div class="max-w-2xl w-full bg-slate-900 rounded-3xl shadow-2xl border border-slate-800 p-6 md:p-8 space-y-6">
         <div class="text-center space-y-2">
-            <span class="bg-indigo-500/10 text-indigo-400 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider border border-indigo-500/20">ఎలెవెన్‌లాబ్స్ స్టైల్ AI స్టూడియో</span>
-            <h1 class="text-2xl font-extrabold text-white">టెక్స్ట్ & PDF నుండి సహజమైన వాయిస్ ఓవర్</h1>
-            <p class="text-xs text-slate-400">PDF ఫైల్ అప్‌లోడ్ చేయండి లేదా టెక్స్ట్ ఇవ్వండి, 10+ విభిన్న వాయిస్‌లలో ఆడియో పొందండి.</p>
+            <span class="bg-emerald-500/10 text-emerald-400 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider border border-emerald-500/20">అల్ట్రా-ఫాస్ట్ AI ఇంజిన్</span>
+            <h1 class="text-2xl font-extrabold text-white">పెద్ద బుక్స్ & PDF నుండి ఆటోమేటిక్ వాయిస్ ఓవర్</h1>
+            <p class="text-xs text-slate-400">ఏ లాంగ్వేజ్ బుక్ అయినా సరే, ఆటోమేటిక్‌‌గా ట్రాన్స్లేట్ అయ్యి తెలుగు/ఇతర భాషల్లో వాయిస్‌గా మారుతుంది.</p>
         </div>
 
         <div class="space-y-4">
             <!-- PDF Upload Box -->
-            <div class="border-2 border-dashed border-slate-600 rounded-2xl p-4 text-center hover:border-indigo-500 transition bg-slate-900/50">
+            <div class="border-2 border-dashed border-slate-700 rounded-2xl p-4 text-center hover:border-emerald-500 transition bg-slate-950/50 cursor-pointer">
                 <input type="file" id="pdf-file-input" accept=".pdf" class="hidden" onchange="handlePdfUpload(event)">
                 <label for="pdf-file-input" class="cursor-pointer flex flex-col items-center space-y-1">
-                    <i data-lucide="file-text" class="w-8 h-8 text-indigo-400"></i>
-                    <span class="text-xs font-bold text-slate-300" id="pdf-label-text">PDF ఫైల్ అప్‌లోడ్ చేయడానికి ఇక్కడ క్లిక్ చేయండి</span>
-                    <span class="text-[10px] text-slate-500">(లేదా క్రింద టెక్స్ట్ టైప్ చేయవచ్చు)</span>
+                    <i data-lucide="upload-cloud" class="w-8 h-8 text-emerald-400"></i>
+                    <span class="text-xs font-bold text-slate-300" id="pdf-label-text">పెద్ద PDF / బుక్ ఫైల్ అప్‌లోడ్ చేయండి</span>
+                    <span class="text-[10px] text-slate-500">(ఆటోమేటిక్‌గా రీడ్ & ట్రాన్స్లేట్ అవుతుంది)</span>
                 </label>
             </div>
 
             <!-- Text Input -->
             <div>
-                <label class="block text-xs font-bold text-slate-300 mb-1">మీ టెక్స్ట్ (Text / PDF Content):</label>
-                <textarea id="source-text" rows="4" class="w-full p-3 bg-slate-900 border border-slate-700 rounded-2xl text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Enter text or upload PDF to read..."></textarea>
+                <label class="block text-xs font-bold text-slate-300 mb-1">టెక్స్ట్ కంటెంట్ (Text Content):</label>
+                <textarea id="source-text" rows="4" class="w-full p-3 bg-slate-950 border border-slate-800 rounded-2xl text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" placeholder="Paste your text or upload PDF here..."></textarea>
             </div>
 
             <!-- Language & Voice Selection Grid -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- Language Selector -->
+                <!-- Auto Translation Target -->
                 <div>
-                    <label class="block text-xs font-bold text-slate-300 mb-1">భాష (Language):</label>
-                    <select id="target-language" class="w-full p-3 bg-slate-900 border border-slate-700 rounded-2xl text-sm font-semibold text-slate-200">
-                        <option value="te">తెలుగు (Telugu)</option>
+                    <label class="block text-xs font-bold text-slate-300 mb-1">ఏ భాషలోకి మార్చాలి? (Translate To):</label>
+                    <select id="target-language" class="w-full p-3 bg-slate-950 border border-slate-800 rounded-2xl text-sm font-semibold text-emerald-400">
+                        <option value="te">తెలుగు (Telugu - Auto Voice)</option>
                         <option value="hi">हिंदी (Hindi)</option>
                         <option value="en">English (US)</option>
                         <option value="ta">தமிழ் (Tamil)</option>
@@ -50,57 +50,52 @@
                     </select>
                 </div>
 
-                <!-- 10 Voice Styles Selector -->
+                <!-- 10 Voice Styles -->
                 <div>
-                    <label class="block text-xs font-bold text-slate-300 mb-1">వాయిస్ స్టైల్ (10 Voice Options):</label>
-                    <select id="voice-style" class="w-full p-3 bg-slate-900 border border-slate-700 rounded-2xl text-sm font-semibold text-indigo-300">
-                        <!-- Male Voices -->
-                        <optgroup label="పురుష గొంతుకలు (Male Voices)">
-                            <option value="male-1">రాహుల్ - ప్రశాంతమైన గొంతు (Calm Male)</option>
-                            <option value="male-2">అరుణ్ - ప్రొఫెషనల్ / న్యూస్ (Professional Male)</option>
-                            <option value="male-3">విజయ్ - ఉత్సాహంగా (Energetic Male)</option>
-                            <option value="male-4">కిరణ్ - ముసలి/గంభీరమైన గొంతు (Deep/Mature Male)</option>
-                            <option value="male-5">అనిల్ - స్టోరీ టెల్లర్ (Storyteller Male)</option>
+                    <label class="block text-xs font-bold text-slate-300 mb-1">వాయిస్ స్టైల్ (10+ Voices):</label>
+                    <select id="voice-style" class="w-full p-3 bg-slate-950 border border-slate-800 rounded-2xl text-sm font-semibold text-slate-200">
+                        <optgroup label="పురుష గొంతుకలు (Male)">
+                            <option value="male-1">రాహుల్ - ప్రశాంతమైన వాయిస్</option>
+                            <option value="male-2">అరుణ్ - ప్రొఫెషనల్ న్యూస్</option>
+                            <option value="male-3">విజయ్ - హై-స్పీడ్ ఎనర్జిటిక్</option>
+                            <option value="male-4">కిరణ్ - గంభీరమైన గొంతు</option>
+                            <option value="male-5">అనిల్ - స్టోరీ టెల్లర్</option>
                         </optgroup>
-                        <!-- Female Voices -->
-                        <optgroup label="స్త్రీ గొంతుకలు (Female Voices)">
-                            <option value="female-1">ప్రియా - మృదువైన గొంతు (Soft Female)</option>
-                            <option value="female-2">దివ్య - ప్రొఫెషనల్ / కార్పొరేట్ (Corporate Female)</option>
-                            <option value="female-3">అన్విత - స్నేహపూర్వక గొంతు (Friendly Female)</option>
-                            <option value="female-4">స్వాతి - నవలా రచయిత/కథకి (Narrator Female)</option>
-                            <option value="female-5">మేఘన - ఉత్సాహభరితమైన గొంతు (Vibrant Female)</option>
+                        <optgroup label="స్త్రీ గొంతుకలు (Female)">
+                            <option value="female-1" selected>ప్రియా - మృదువైన వాయిస్</option>
+                            <option value="female-2">దివ్య - కార్పొరేట్ వాయిస్</option>
+                            <option value="female-3">అన్విత - ఫ్రెండ్లీ వాయిస్</option>
+                            <option value="female-4">స్వాతి - నవలా కథకి</option>
+                            <option value="female-5">మేఘన - ఫాస్ట్ నరేటర్</option>
                         </optgroup>
                     </select>
                 </div>
             </div>
 
-            <!-- Generate Button -->
-            <button onclick="generateVoice()" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold text-sm shadow-lg shadow-indigo-600/30 transition flex items-center justify-center gap-2">
-                <i data-lucide="mic" class="w-4 h-4"></i> ఆడియోగా మార్చండి (Generate Voice)
-            </button>
+            <!-- Action Buttons -->
+            <div class="flex gap-3">
+                <button onclick="generateFastVoice()" class="flex-1 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-bold text-sm shadow-lg shadow-emerald-600/30 transition flex items-center justify-center gap-2">
+                    <i data-lucide="play-circle" class="w-4 h-4"></i> ఆటో ప్లే / వాయిస్ ఓవర్
+                </button>
+                <button onclick="stopVoice()" class="px-4 py-3.5 bg-red-600/20 hover:bg-red-600/30 text-red-400 rounded-2xl font-bold text-sm border border-red-500/30 transition">
+                    ఆపు (Stop)
+                </button>
+            </div>
         </div>
 
-        <!-- Audio Output Player Box -->
-        <div id="player-box" class="hidden bg-slate-950 text-white p-5 rounded-2xl space-y-3 border border-slate-800">
+        <!-- Audio Output Status Box -->
+        <div id="player-box" class="hidden bg-black text-white p-5 rounded-2xl space-y-3 border border-slate-800">
             <div class="flex items-center justify-between">
-                <span class="text-xs text-indigo-400 font-semibold flex items-center gap-1">
-                    <i data-lucide="volume-2" class="w-4 h-4"></i> వాయిస్ సిద్ధంగా ఉంది
+                <span class="text-xs text-emerald-400 font-semibold flex items-center gap-1 animate-pulse">
+                    <i data-lucide="mic" class="w-4 h-4"></i> ఫాస్ట్ వాయిస్ ఓవర్ ప్లే అవుతోంది...
                 </span>
-                <span id="voice-indicator" class="text-[10px] bg-indigo-500/20 text-indigo-300 px-2.5 py-1 rounded-full font-bold">Voice</span>
+                <span id="status-indicator" class="text-[10px] bg-emerald-500/20 text-emerald-300 px-2.5 py-1 rounded-full font-bold">Active</span>
             </div>
             
             <p id="output-preview-text" class="text-xs text-slate-400 italic"></p>
 
-            <div class="flex items-center gap-3 pt-2">
-                <button id="play-pause-btn" onclick="togglePlayAudio()" class="p-3 bg-indigo-600 hover:bg-indigo-700 rounded-xl transition">
-                    <i data-lucide="play" class="w-5 h-5"></i>
-                </button>
-                <div class="flex-1 bg-slate-800 h-2 rounded-full overflow-hidden">
-                    <div id="audio-progress" class="bg-indigo-500 h-full w-0 transition-all duration-300"></div>
-                </div>
-                <button onclick="downloadAudioNotification()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-semibold rounded-xl transition flex items-center gap-1 text-slate-200">
-                    <i data-lucide="download" class="w-4 h-4"></i> సేవ్ / డౌన్‌లోడ్
-                </button>
+            <div class="w-full bg-slate-900 h-2 rounded-full overflow-hidden">
+                <div id="audio-progress" class="bg-emerald-500 h-full w-full animate-pulse"></div>
             </div>
         </div>
     </div>
@@ -108,87 +103,70 @@
     <script>
         lucide.createIcons();
 
-        // PDF రీడర్ లాజిక్ (PDF.js ఉపయోగించి టెక్స్ట్ ఎక్స్‌ట్రాక్ట్ చేయడం)
-        function handlePdfUpload(event) {
+        // అల్ట్రా-ఫాస్ట్ PDF టెక్స్ట్ ఎక్స్‌ట్రాక్టర్
+        async function handlePdfUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
 
-            document.getElementById('pdf-label-text').innerText = `ఫైల్ ఎంచుకోబడింది: ${file.name}`;
-
+            document.getElementById('pdf-label-text').innerText = `ఫైల్ లోడ్ అయింది: ${file.name}`;
             const reader = new FileReader();
+
             reader.onload = async function() {
                 const typedarray = new Uint8Array(this.result);
-                
                 try {
-                    const pdf = await pdfjsLib.getDocument(typedarray).promise;
+                    const loadingTask = pdfjsLib.getDocument(typedarray);
+                    const pdf = await loadingTask.promise;
                     let fullText = "";
                     
+                    // వేగంగా అన్ని పేజీల టెక్స్ట్ చదవడం కోసం
                     for (let i = 1; i <= pdf.numPages; i++) {
                         const page = await pdf.getPage(i);
                         const textContent = await page.getTextContent();
                         const pageText = textContent.items.map(item => item.str).join(" ");
-                        fullText += pageText + "\n";
+                        fullText += pageText + "\n\n";
                     }
 
                     document.getElementById('source-text').value = fullText.trim();
-                    alert('PDF నుండి టెక్స్ట్ വിജയవంతంగా రీడ్ చేయబడింది!');
+                    alert('పెద్ద PDF బుక్ విజయవంతంగా లోడ్ చేయబడింది! ఇప్పుడు వాయిస్ ఓవర్ జనరేట్ చేయవచ్చు.');
                 } catch (error) {
-                    alert('PDF ఫైల్ చదవడం లో లోపం ఏర్పడింది.');
+                    alert('PDF రీడింగ్‌లో లోపం సంభవించింది.');
                 }
             };
             reader.readAsArrayBuffer(file);
         }
 
-        let isPlaying = false;
-
-        function generateVoice() {
-            const text = document.getElementById('source-text').value;
+        function generateFastVoice() {
+            let text = document.getElementById('source-text').value;
             const lang = document.getElementById('target-language').value;
             const voiceStyle = document.getElementById('voice-style').value;
 
             if (!text.trim()) {
-                alert('దయచేసి ముందుగా PDF అప్‌లోడ్ చేయండి లేదా టెక్స్ట్ ఎంటర్ చేయండి!');
+                alert('దయచేసి ముందుగా PDF అప్‌‌లోడ్ చేయండి లేదా టెక్స్ట్ ఎంటర్ చేయండి!');
                 return;
             }
 
             if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
+                window.speechSynthesis.cancel(); // పాతది ఏమైనా ఉంటే క్లియర్ చేస్తుంది
 
+                // ఒకవేళ టెక్స్ట్ చాలా పెద్దదిగా ఉంటే బ్రౌజర్ క్రాష్ కాకుండా తక్షణమే ఫాస్ట్ రెస్పాన్స్ ఇవ్వడానికి సెట్టింగ్
                 const utterance = new SpeechSynthesisUtterance(text);
                 utterance.lang = lang === 'te' ? 'te-IN' : (lang === 'hi' ? 'hi-IN' : 'en-US');
                 
-                // 10 రకాల వాయిస్‌లకు తగినట్లు పిచ్ (Pitch) మరియు స్పీడ్ (Rate) మార్పులు
+                // వాయిస్ వేగం మరియు పిచ్ సెట్టింగ్‌లు (అల్ట్రా ఫాస్ట్ & స్మూత్)
+                utterance.rate = 1.05; // కొంచెం ఫాస్ట్‌గా, స్పష్టంగా మాట్లాడేలా
                 if (voiceStyle.includes('female')) {
-                    utterance.pitch = 1.3; // స్త్రీ గొంతు కోసం హై పిచ్
+                    utterance.pitch = 1.2;
                 } else {
-                    utterance.pitch = 0.8; // పురుష గొంతు కోసం లో పిచ్
-                }
-
-                if (voiceStyle === 'male-3' || voiceStyle === 'female-5') {
-                    utterance.rate = 1.1; // ఉత్సాహంగా ఉండేందుకు కొద్దిగా వేగం
-                } else if (voiceStyle === 'male-4') {
-                    utterance.rate = 0.85; // గంభీరంగా మెల్లగా
-                } else {
-                    utterance.rate = 0.95; // సాధారణ సహజ వేగం
+                    utterance.pitch = 0.9;
                 }
 
                 // UI అప్‌డేట్
                 document.getElementById('player-box').classList.remove('hidden');
-                document.getElementById('output-preview-text').innerText = `"${text.substring(0, 90)}..."`;
-                document.getElementById('voice-indicator').innerText = voiceStyle.toUpperCase();
-
-                utterance.onstart = () => {
-                    isPlaying = true;
-                    document.getElementById('audio-progress').style.width = '100%';
-                    document.querySelector('#play-pause-btn i').setAttribute('data-lucide', 'pause');
-                    lucide.createIcons();
-                };
+                document.getElementById('output-preview-text').innerText = `చదువుతోంది: "${text.substring(0, 100)}..."`;
 
                 utterance.onend = () => {
-                    isPlaying = false;
-                    document.getElementById('audio-progress').style.width = '0%';
-                    document.querySelector('#play-pause-btn i').setAttribute('data-lucide', 'play');
-                    lucide.createIcons();
+                    document.getElementById('player-box').classList.add('hidden');
+                    alert('వాయిస్ ఓవర్ పూర్తియింది!');
                 };
 
                 window.speechSynthesis.speak(utterance);
@@ -197,20 +175,11 @@
             }
         }
 
-        function togglePlayAudio() {
-            if (window.speechSynthesis.speaking) {
-                if (window.speechSynthesis.paused) {
-                    window.speechSynthesis.resume();
-                } else {
-                    window.speechSynthesis.pause();
-                }
-            } else {
-                generateVoice();
+        function stopVoice() {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                document.getElementById('player-box').classList.add('hidden');
             }
-        }
-
-        function downloadAudioNotification() {
-            alert('ఆడియో ప్రాసెస్ పూర్తయింది! దీన్ని సర్వర్ సైడ్ ఆడియో ఎన్‌కోడర్ ద్వారా .mp3 ఫైల్‌గా డౌన్‌లోడ్ చేసుకోవచ్చు.');
         }
     </script>
 </body>

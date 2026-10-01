@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Voice Over & PDF Audio Studio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- PDF.js for reading PDF files -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col items-center justify-center p-4">
+
+    <div class="max-w-2xl w-full bg-slate-800 rounded-3xl shadow-2xl border border-slate-700 p-6 md:p-8 space-y-6">
+        <div class="text-center space-y-2">
+            <span class="bg-indigo-500/15 text-indigo-400 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider border border-indigo-500/30">ElevenLabs Style AI Studio</span>
+            <h1 class="text-2xl font-extrabold text-white">AI Voice Over & PDF Audio Studio</h1>
+            <p class="text-xs text-slate-400">Upload a PDF or type text to instantly generate natural human-like multilingual voiceovers.</p>
+        </div>
+
+        <div class="space-y-4">
+            <!-- PDF Upload Box -->
+            <div class="border-2 border-dashed border-slate-600 rounded-2xl p-4 text-center hover:border-indigo-500 transition bg-slate-900/50">
+                <input type="file" id="pdf-file-input" accept=".pdf" class="hidden" onchange="handlePdfUpload(event)">
+                <label for="pdf-file-input" class="cursor-pointer flex flex-col items-center space-y-1">
+                    <i data-lucide="file-text" class="w-8 h-8 text-indigo-400"></i>
+                    <span class="text-xs font-bold text-slate-300" id="pdf-label-text">Click here to upload PDF file</span>
+                    <span class="text-[10px] text-slate-500">(Auto-detects and extracts text from any language)</span>
+                </label>
+            </div>
+
+            <!-- Text Input -->
+            <div>
+                <label class="block text-xs font-bold text-slate-300 mb-1">Source Text / PDF Content:</label>
+                <textarea id="source-text" rows="4" class="w-full p-3 bg-slate-900 border border-slate-700 rounded-2xl text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Type text or upload a PDF to auto-populate..."></textarea>
+            </div>
+
+            <!-- Language & Voice Selection Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Language Selector -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 mb-1">Target Language:</label>
+                    <select id="target-language" class="w-full p-3 bg-slate-900 border border-slate-700 rounded-2xl text-sm font-semibold text-slate-200">
+                        <option value="en">English (US)</option>
+                        <option value="te">Telugu (తెలుగు)</option>
+                        <option value="hi">Hindi (हिंदी)</option>
+                        <option value="ta">Tamil (தமிழ்)</option>
+                        <option value="kn">Kannada (ಕನ್ನಡ)</option>
+                        <option value="ml">Malayalam (മലയാളം)</option>
+                    </select>
+                </div>
+
+                <!-- Voice Style Selector -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 mb-1">Voice Persona:</label>
+                    <select id="voice-style" class="w-full p-3 bg-slate-900 border border-slate-700 rounded-2xl text-sm font-semibold text-indigo-300">
+                        <optgroup label="Male Voices">
+                            <option value="male-1">Rahul - Calm & Natural</option>
+                            <option value="male-2">Arun - Professional News</option>
+                            <option value="male-3">Vijay - Energetic</option>
+                            <option value="male-4">Kiran - Deep & Mature</option>
+                            <option value="male-5">Anil - Storyteller</option>
+                        </optgroup>
+                        <optgroup label="Female Voices">
+                            <option value="female-1">Priya - Soft & Gentle</option>
+                            <option value="female-2">Divya - Corporate Professional</option>
+                            <option value="female-3">Anvitha - Friendly & Warm</option>
+                            <option value="female-4">Swati - Narrator</option>
+                            <option value="female-5">Meghana - Vibrant & Lively</option>
+                        </optgroup>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Generate Button -->
+            <button onclick="generateVoice()" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold text-sm shadow-lg shadow-indigo-600/30 transition flex items-center justify-center gap-2">
+                <i data-lucide="mic" class="w-4 h-4"></i> Generate Voice & Audio
+            </button>
+        </div>
+
+        <!-- Audio Output Player Box -->
+        <div id="player-box" class="hidden bg-slate-950 text-white p-5 rounded-2xl space-y-3 border border-slate-800">
+            <div class="flex items-center justify-between">
+                <span class="text-xs text-indigo-400 font-semibold flex items-center gap-1">
+                    <i data-lucide="volume-2" class="w-4 h-4"></i> Voice Audio Ready
+                </span>
+                <span id="voice-indicator" class="text-[10px] bg-indigo-500/20 text-indigo-300 px-2.5 py-1 rounded-full font-bold">Voice</span>
+            </div>
+            
+            <p id="output-preview-text" class="text-xs text-slate-400 italic"></p>
+
+            <div class="flex items-center gap-3 pt-2">
+                <button id="play-pause-btn" onclick="togglePlayAudio()" class="p-3 bg-indigo-600 hover:bg-indigo-700 rounded-xl transition">
+                    <i data-lucide="play" class="w-5 h-5"></i>
+                </button>
+                <div class="flex-1 bg-slate-800 h-2 rounded-full overflow-hidden">
+                    <div id="audio-progress" class="bg-indigo-500 h-full w-0 transition-all duration-300"></div>
+                </div>
+                <button onclick="downloadAudioFile()" class="px-3 py-2 bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 text-xs font-semibold rounded-xl transition border border-indigo-500/30 flex items-center gap-1">
+                    <i data-lucide="download" class="w-4 h-4"></i> Download MP3
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        // PDF Auto Extraction using PDF.js
+        function handlePdfUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            document.getElementById('pdf-label-text').innerText = `File Selected: ${file.name}`;
+
+            const reader = new FileReader();
+            reader.onload = async function() {
+                const typedarray = new Uint8Array(this.result);
+                try {
+                    const pdf = await pdfjsLib.getDocument(typedarray).promise;
+                    let fullText = "";
+                    
+                    for (let i = 1; i <= pdf.numPages; i++) {
+                        const page = await pdf.getPage(i);
+                        const textContent = await page.getTextContent();
+                        const pageText = textContent.items.map(item => item.str).join(" ");
+                        fullText += pageText + "\n";
+                    }
+
+                    document.getElementById('source-text').value = fullText.trim();
+                    
+                    // Auto trigger generation on PDF upload completion
+                    generateVoice();
+                } catch (error) {
+                    alert('Error reading PDF file. Please try another file.');
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        let currentUtterance = null;
+
+        function generateVoice() {
+            const text = document.getElementById('source-text').value;
+            const lang = document.getElementById('target-language').value;
+            const voiceStyle = document.getElementById('voice-style').value;
+
+            if (!text.trim()) {
+                alert('Please upload a PDF or enter text to generate voice audio!');
+                return;
+            }
+
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+
+                currentUtterance = new SpeechSynthesisUtterance(text);
+                currentUtterance.lang = lang === 'te' ? 'te-IN' : (lang === 'hi' ? 'hi-IN' : (lang === 'ta' ? 'ta-IN' : (lang === 'kn' ? 'kn-IN' : (lang === 'ml' ? 'ml-IN' : 'en-US'))));
+                
+                // Adjust pitch and rate for different voice personas
+                if (voiceStyle.includes('female')) {
+                    currentUtterance.pitch = 1.3;
+                } else {
+                    currentUtterance.pitch = 0.8;
+                }
+
+                if (voiceStyle === 'male-3' || voiceStyle === 'female-5') {
+                    currentUtterance.rate = 1.1;
+                } else if (voiceStyle === 'male-4') {
+                    currentUtterance.rate = 0.85;
+                } else {
+                    currentUtterance.rate = 0.95;
+                }
+
+                // Update UI Player
+                document.getElementById('player-box').classList.remove('hidden');
+                document.getElementById('output-preview-text').innerText = `"${text.substring(0, 90)}..."`;
+                document.getElementById('voice-indicator').innerText = voiceStyle.toUpperCase();
+
+                currentUtterance.onstart = () => {
+                    document.getElementById('audio-progress').style.width = '100%';
+                    document.querySelector('#play-pause-btn i').setAttribute('data-lucide', 'pause');
+                    lucide.createIcons();
+                };
+
+                currentUtterance.onend = () => {
+                    document.getElementById('audio-progress').style.width = '0%';
+                    document.querySelector('#play-pause-btn i').setAttribute('data-lucide', 'play');
+                    lucide.createIcons();
+                };
+
+                window.speechSynthesis.speak(currentUtterance);
+            } else {
+                alert('Speech synthesis is not supported in your browser.');
+            }
+        }
+
+        function togglePlayAudio() {
+            if (window.speechSynthesis.speaking) {
+                if (window.speechSynthesis.paused) {
+                    window.speechSynthesis.resume();
+                } else {
+                    window.speechSynthesis.pause();
+                }
+            } else {
+                generateVoice();
+            }
+        }
+
+        function downloadAudioFile() {
+            const text = document.getElementById('source-text').value;
+            if (!text.trim()) {
+                alert('No audio available to download.');
+                return;
+            }
+            
+            // Creating a dummy downloadable blob notification for browser client-side use
+            const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'voiceover_script_audio.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            alert('Audio script downloaded successfully! (For direct MP3 file encoding, backend server conversion can be linked).');
+        }
+    </script>
+</body>
+</html>

@@ -146,6 +146,9 @@
     }
     const db = firebase.database();
 
+    // మీ వాట్సాప్ నంబర్ ఇక్కడ సెట్ చేయబడింది (919381198260)
+    const OWNER_WHATSAPP_NUMBER = "919381198260";
+
     let courseData = JSON.parse(localStorage.getItem('institute_courses')) || {
         'HTML': { videos: [], expiry: null },
         'CSS': { videos: [], expiry: null },
@@ -191,19 +194,28 @@
             return;
         }
 
+        let loginTime = new Date().toLocaleString();
         let customerObj = { 
             name: name, 
             phone: phone, 
-            date: new Date().toLocaleString() 
+            date: loginTime 
         };
 
-        // Firebase క్లౌడ్ డేటాబేస్‌కు డేటాను పంపడం (ఏ మొబైల్ నుంచి లాగిన్ అయినా ఇక్కడ సేవ్ అవుతుంది)
+        // Firebase క్లౌడ్ డేటాబేస్‌కు డేటాను పంపడం
         db.ref('customers/' + phone).set(customerObj)
         .then(() => {
             localStorage.setItem('active_customer', JSON.stringify(customerObj));
             document.getElementById('auth-modal').style.display = 'none';
             document.getElementById('welcome-user-display').innerText = `Welcome, ${name} (${phone})`;
-            alert("Login Successful!");
+            
+            // కస్టమర్ లాగిన్ అయిన వెంటనే మీ వాట్సాప్‌కి మెసేజ్ పంపే కోడ్ (WhatsApp API)
+            let whatsappMessage = encodeURIComponent(`New Student Login!\n\nName: ${name}\nPhone: ${phone}\nTime: ${loginTime}`);
+            let whatsappURL = `https://wa.me/${OWNER_WHATSAPP_NUMBER}?text=${whatsappMessage}`;
+            
+            // ఒక కొత్త టాబ్‌లో వాట్సాప్ ఓపెన్ అయ్యి మీకు మెసేజ్ వెళ్తుంది
+            window.open(whatsappURL, '_blank');
+
+            alert("Login Successful! Redirecting to WhatsApp notification...");
         })
         .catch((error) => {
             alert("Connection error. Please try again.");
@@ -452,6 +464,7 @@
             courseData[courseName] = { videos: [], expiry: null };
             saveData();
             renderCourses();
+            document.getElementById('new-course-name', '');
             document.getElementById('new-course-name').value = '';
             alert("Course added successfully!");
         } else {

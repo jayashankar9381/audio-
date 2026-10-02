@@ -1,29 +1,31 @@
 <!DOCTYPE html>
-<html lang="te">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ఆన్‌లైన్ టెక్నికల్ ఇన్‌స్టిట్యూట్</title>
+    <title>Online Technical Institute</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f4f4f9; }
         .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        h1, h2 { color: #333; text-align: center; }
+        h1, h2, h3 { color: #333; text-align: center; }
         .course-grid { display: flex; gap: 15px; justify-content: center; margin-top: 20px; flex-wrap: wrap; }
         .course-btn { padding: 15px 25px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
         .course-btn:hover { background: #0056b3; }
         .locked-section { background: #fff3cd; padding: 20px; border: 1px solid #ffeeba; margin-top: 20px; border-radius: 5px; text-align: center; }
-        .unlocked-section { background: #d4edda; padding: 20px; border: 1px solid #c3e6cb; margin-top: 20px; border-radius: 5px; }
-        .admin-box { background: #e2e3e5; padding: 15px; margin-top: 30px; border-radius: 5px; }
-        input, button { padding: 10px; margin: 5px; font-size: 14px; }
+        .unlocked-section { background: #d4edda; padding: 20px; border: 1px solid #c3e6cb; margin-top: 20px; border-radius: 5px; text-align: center; }
+        .admin-box { background: #e2e3e5; padding: 20px; margin-top: 40px; border-radius: 5px; border-top: 3px solid #333; }
+        .contact-box { background: #e8f4fd; padding: 15px; margin-top: 30px; border-radius: 5px; text-align: center; border: 1px solid #b8daff; }
+        input, button, select { padding: 10px; margin: 5px; font-size: 14px; }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>ఆన్‌లైన్ కోర్సులు</h1>
-    <p style="text-align: center;">కింది కోర్సుల్లో ఒకదానిని ఎంచుకోండి:</p>
+    <h1>Online Technical Institute</h1>
+    <p style="text-align: center;">Select a course below to start learning:</p>
 
-    <!-- కోర్సుల బటన్లు -->
+    <!-- Course Buttons for Customers -->
     <div class="course-grid">
         <button class="course-btn" onclick="selectCourse('HTML')">HTML</button>
         <button class="course-btn" onclick="selectCourse('CSS')">CSS</button>
@@ -31,31 +33,53 @@
         <button class="course-btn" onclick="selectCourse('Java')">Java</button>
     </div>
 
+    <!-- Course Content Area -->
     <div id="course-content" style="margin-top: 30px;"></div>
 
-    <!-- ఓనర్ అడ్మిన్ ప్యానెల్ -->
+    <!-- Customer Support / Contact Section -->
+    <div class="contact-box">
+        <h3>Have any Doubts or Questions?</h3>
+        <p>Contact us directly or send a message on WhatsApp for instant support:</p>
+        <p>📞 <b>Phone / WhatsApp:</b> <a href="https://wa.me/919381198260" target="_blank" style="color: #28a745; font-weight: bold; text-decoration: none;">+91 93811 98260</a></p>
+        <a href="https://wa.me/919381198260?text=Hello,%20I%20have%20a%20doubt%20regarding%20the%20course." target="_blank">
+            <button style="background: #25d366; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold;">Chat on WhatsApp</button>
+        </a>
+    </div>
+
+    <!-- Owner / Admin Panel (Completely Separate & Hidden from normal view) -->
     <div class="admin-box">
-        <h3>ఓనర్ లాగిన్ & వీడియో లింక్ సెటప్</h3>
+        <h3>Owner Portal (Admin Only)</h3>
         <div id="owner-login-section">
-            <input type="text" id="owner-whatsapp" placeholder="వాట్సాప్ నెంబర్ ఎంటర్ చేయండి">
-            <button onclick="ownerLogin()">లాగిన్ అవ్వండి</button>
+            <input type="text" id="owner-whatsapp" placeholder="Enter Owner WhatsApp Number">
+            <button onclick="ownerLogin()" style="background: #333; color: white; border: none; cursor: pointer; border-radius: 4px;">Login as Owner</button>
         </div>
-        <div id="owner-dashboard" style="display:none;">
-            <p style="color: green; font-weight: bold;">✔ ఓనర్‌గా లాగిన్ అయ్యారు</p>
+        
+        <div id="owner-dashboard" class="hidden">
+            <p style="color: green; font-weight: bold;">✔ Logged in as Owner Successfully</p>
+            
+            <hr>
+            <h4>1. Set YouTube Video Links for Courses</h4>
+            <label>Select Course:</label>
             <select id="target-course">
                 <option value="HTML">HTML</option>
                 <option value="CSS">CSS</option>
                 <option value="Python">Python</option>
                 <option value="Java">Java</option>
-            </select>
-            <input type="text" id="yt-link" placeholder="YouTube లింక్ ఇక్కడ పేస్ట్ చేయండి">
-            <button onclick="saveYoutubeLink()">లింక్ సేవ్ చేయి</button>
+            </select><br>
+            <input type="text" id="yt-link" placeholder="Paste YouTube Video Link here" style="width: 60%;">
+            <button onclick="saveYoutubeLink()" style="background: #28a745; color: white; border: none; cursor: pointer; border-radius: 4px;">Save YouTube Link</button>
+
+            <hr style="margin-top: 20px;">
+            <h4>2. Set Payment Gateway Links</h4>
+            <input type="text" id="pay-1500-link" placeholder="Enter Payment Link for Rs. 1500 Plan" style="width: 60%;"><br>
+            <input type="text" id="pay-3000-link" placeholder="Enter Payment Link for Rs. 3000 Plan" style="width: 60%;"><br>
+            <button onclick="savePaymentLinks()" style="background: #007bff; color: white; border: none; cursor: pointer; border-radius: 4px;">Save Payment Links</button>
         </div>
     </div>
 </div>
 
 <script>
-    // డేటా స్టోరేజ్ కోసం
+    // Data Storage for Courses and Payment Links
     let courseData = {
         'HTML': { link: '', unlocked: false },
         'CSS': { link: '', unlocked: false },
@@ -63,49 +87,65 @@
         'Java': { link: '', unlocked: false }
     };
 
+    let paymentLinks = {
+        '1500': '#',
+        '3000': '#'
+    };
+
     let currentCourse = '';
 
     function selectCourse(courseName) {
         currentCourse = courseName;
         let contentDiv = document.getElementById('course-content');
-        
         let data = courseData[courseName];
 
         if (data.unlocked) {
-            // వీడియో అన్‌లాక్ అయితే చూపించు
             contentDiv.innerHTML = `
                 <div class="unlocked-section">
-                    <h2>${courseName} కోర్సు వీడియోలు (அన్‌లాక్ చేయబడ్డాయి 🔓)</h2>
-                    ${data.link ? `<p><a href="${data.link}" target="_blank">👉 ఇక్కడ క్లిక్ చేసి వీడియో చూడండి</a></p>` : '<p>త్వరలో వీడియో అప్‌డేట్ చేయబడుతుంది.</p>'}
+                    <h2>${courseName} Course Unlocked 🔓</h2>
+                    ${data.link ? `<p><a href="${data.link}" target="_blank" style="font-size: 18px; color: #007bff; font-weight: bold;">👉 Click Here to Watch Course Video</a></p>` : '<p style="color: red;">Owner has not updated the video link yet. Please check back soon.</p>'}
                 </div>
             `;
         } else {
-            // లాక్ అయి ఉంటే పేమెంట్ ఆప్షన్స్ చూపించు
             contentDiv.innerHTML = `
                 <div class="locked-section">
-                    <h2>${courseName} కోర్సు లాక్ చేయబడింది 🔒</h2>
-                    <p>వీడియోలు చూడటానికి క్రింది ప్లాన్‌లలో ఒకటి ఎంచుకుని పేమెంట్ చేయండి:</p>
-                    <label><input type="radio" name="plan" value="1500" checked> రూ. 1500/- (1 నెల సర్టిఫికెట్ ప్లాన్)</label><br>
-                    <label><input type="radio" name="plan" value="3000"> రూ. 3000/- (2 నెలల సర్టిఫికెట్ ప్లాన్)</label><br><br>
-                    <button onclick="makePayment()" style="background: #28a745; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 4px;">పేమెంట్ పూర్తి చేయి (Pay Now)</button>
+                    <h2>${courseName} Course is Locked 🔒</h2>
+                    <p>Please select a payment plan below and complete payment to unlock:</p>
+                    
+                    <label><input type="radio" name="plan" value="1500" checked> Rs. 1500/- (1 Month Access + Certificate)</label><br>
+                    <label><input type="radio" name="plan" value="3000"> Rs. 3000/- (2 Months Access + Certificate)</label><br><br>
+                    
+                    <button onclick="proceedToPayment()" style="background: #28a745; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 4px; font-size: 16px;">Proceed to Pay & Unlock</button>
                 </div>
             `;
         }
     }
 
-    function makePayment() {
-        alert("పేమెంట్ విజయవంతమైంది! వీడియోలు అన్‌లాక్ చేయబడ్డాయి.");
-        courseData[currentCourse].unlocked = true;
-        selectCourse(currentCourse);
+    function proceedToPayment() {
+        let selectedPlan = document.querySelector('input[name="plan"]:checked').value;
+        let targetPayLink = paymentLinks[selectedPlan];
+
+        if(targetPayLink && targetPayLink !== '#') {
+            window.open(targetPayLink, '_blank');
+        } else {
+            alert("Redirecting to demo payment gateway for Rs. " + selectedPlan + "/-");
+        }
+
+        // Simulating successful payment after click for testing
+        setTimeout(() => {
+            alert("Payment Successful! Course videos are now unlocked.");
+            courseData[currentCourse].unlocked = true;
+            selectCourse(currentCourse);
+        }, 1000);
     }
 
     function ownerLogin() {
         let wpNumber = document.getElementById('owner-whatsapp').value;
         if(wpNumber.trim() !== '') {
-            document.getElementById('owner-login-section').style.display = 'none';
-            document.getElementById('owner-dashboard').style.display = 'block';
+            document.getElementById('owner-login-section').classList.add('hidden');
+            document.getElementById('owner-dashboard').classList.remove('hidden');
         } else {
-            alert('దయచేసి వాట్సాప్ నెంబర్ ఇవ్వండి.');
+            alert('Please enter a valid WhatsApp number.');
         }
     }
 
@@ -114,11 +154,21 @@
         let link = document.getElementById('yt-link').value;
         if(link.trim() !== '') {
             courseData[select].link = link;
-            alert(select + " కోర్సుకు YouTube లింక్ విజయవంతంగా సేవ్ చేయబడింది!");
+            alert(select + " YouTube link saved successfully!");
             document.getElementById('yt-link').value = '';
         } else {
-            alert('దయచేసి సరైన లింక్ ఇవ్వండి.');
+            alert('Please enter a valid YouTube link.');
         }
+    }
+
+    function savePaymentLinks() {
+        let link1500 = document.getElementById('pay-1500-link').value;
+        let link3000 = document.getElementById('pay-3000-link').value;
+
+        if(link1500.trim() !== '') paymentLinks['1500'] = link1500;
+        if(link3000.trim() !== '') paymentLinks['3000'] = link3000;
+
+        alert("Payment links updated successfully by Owner!");
     }
 </script>
 

@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Online Technical Institute</title>
+    <!-- Firebase App & Database CDNs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
         body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f4f4f9; }
         .container { max-width: 850px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
@@ -33,13 +36,13 @@
 </head>
 <body>
 
-<!-- Customer Registration Popup (Unchanged) -->
-<div id="auth-modal">
+<!-- Customer Registration Popup -->
+<div id="auth-modal" class="hidden">
     <div class="modal-content">
         <h2>Welcome Student</h2>
         <p style="font-size: 13px; color: #666;">Please enter your details to access the portal:</p>
         <input type="text" id="user-reg-name" placeholder="Enter Your Full Name"><br>
-        <input type="text" id="user-reg-phone" placeholder="Enter Your Phone Number"><br>
+        <input type="text" id="user-reg-phone" placeholder="Enter 10-Digit Mobile Number" maxlength="10"><br>
         <button onclick="registerUser()">Enter Portal</button>
     </div>
 </div>
@@ -48,7 +51,7 @@
 
 <div class="container">
 
-    <!-- Owner / Admin Portal (Updated with Gmail & Password login only) -->
+    <!-- Owner / Admin Portal -->
     <div id="main-admin-container" class="admin-box hidden">
         <h3>🔐 Owner Portal (Admin Access)</h3>
         
@@ -65,13 +68,20 @@
             
             <!-- Customer Registrations View -->
             <div style="background: #fff; padding: 10px; border-radius: 5px; margin-bottom: 20px;">
-                <h4>📋 Customer Registrations List</h4>
-                <div style="max-height: 150px; overflow-y: auto;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h4>📋 Joined Students List (Total: <span id="customer-count">0</span>)</h4>
+                    <div>
+                        <button onclick="manualRefreshList()" style="background: #28a745; color: white; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-size: 11px; margin-right: 5px;">🔄 Refresh List</button>
+                        <button onclick="clearAllCustomers()" style="background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-size: 11px;">Clear List</button>
+                    </div>
+                </div>
+                <div style="max-height: 180px; overflow-y: auto;">
                     <table class="customer-table" id="customer-list-table">
                         <tr>
+                            <th>S.No</th>
                             <th>Name</th>
-                            <th>Phone Number</th>
-                            <th>Date</th>
+                            <th>Mobile Number</th>
+                            <th>Login Date & Time</th>
                         </tr>
                     </table>
                 </div>
@@ -125,6 +135,19 @@
 </div>
 
 <script>
+    // Firebase Configuration Setup
+    const firebaseConfig = {
+        databaseURL: "https://online-technical-institute-default-rtdb.firebaseio.com/"
+    };
+    
+    // Initialize Firebase safely
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+    const db = firebase.database();
+
+    const OWNER_WHATSAPP_NUMBER = "919381198260";
+
     let courseData = JSON.parse(localStorage.getItem('institute_courses')) || {
         'HTML': { videos: [], expiry: null },
         'CSS': { videos: [], expiry: null },
@@ -133,59 +156,137 @@
     };
 
     let paymentLinks = JSON.parse(localStorage.getItem('institute_paylinks')) || { '1500': '', '3000': '' };
-    let customersList = JSON.parse(localStorage.getItem('institute_customers')) || [];
+    let customersList = [];
     let currentCourse = '';
 
     window.onload = function() { 
-        checkUserSession();
-        checkExpiryStatus();
-        renderCourses(); 
-        loadPaymentInputs();
+        try {
+            checkUserSession();
+            checkExpiryStatus();
+            renderCourses(); 
+            loadPaymentInputs();
+            listenToCustomersRealtime();
+        } catch(e) {
+            console.error("Initialization error: ", e);
+        }
     };
 
     function checkUserSession() {
         let savedUser = localStorage.getItem('active_customer');
+        let modal = document.getElementById('auth-modal');
         if (savedUser) {
             let user = JSON.parse(savedUser);
-            document.getElementById('auth-modal').style.display = 'none';
+            modal.style.display = 'none';
             document.getElementById('welcome-user-display').innerText = `Welcome, ${user.name} (${user.phone})`;
         } else {
-            document.getElementById('auth-modal').style.display = 'flex';
+            modal.style.display = 'flex';
         }
     }
 
     function registerUser() {
-        let name = document.getElementById('user-reg-name').value.trim();
-        let phone = document.getElementById('user-reg-phone').value.trim();
+        let nameInput = document.getElementById('user-reg-name');
+        let phoneInput = document.getElementById('user-reg-phone');
+        
+        let name = nameInput ? nameInput.value.trim() : '';
+        let phone = phoneInput ? phoneInput.value.trim() : '';
 
-        if (name === '' || phone === '') {
-            alert('Please enter both your name and phone number.');
+        if (name === '') {
+            alert('దయచేసి మీ పూర్తి పేరు ఎంటర్ చేయండి.');
             return;
         }
 
-        let customerObj = { name: name, phone: phone, date: new Date().toLocaleDateString() };
-        customersList.push(customerObj);
-        localStorage.setItem('institute_customers', JSON.stringify(customersList));
-        localStorage.setItem('active_customer', JSON.stringify(customerObj));
+        let strictPhoneRegex = /^[6-9]\d{9}$/;
+        if (!strictPhoneRegex.test(phone) || /^(\d)\1{9}$/.test(phone)) {
+            alert('దయచేసి మీరు వాడే సరైన 10 అంకెల మొబైల్ నంబర్ మాత్రమే ఎంటర్ చేయండి.');
+            return;
+        }
 
-        document.getElementById('auth-modal').style.display = 'none';
-        document.getElementById('welcome-user-display').innerText = `Welcome, ${name} (${phone})`;
-        renderCustomerTable();
+        let loginTime = new Date().toLocaleString();
+        let customerObj = { 
+            name: name, 
+            phone: phone, 
+            date: loginTime 
+        };
+
+        db.ref('customers/' + phone).set(customerObj)
+        .then(() => {
+            localStorage.setItem('active_customer', JSON.stringify(customerObj));
+            document.getElementById('auth-modal').style.display = 'none';
+            document.getElementById('welcome-user-display').innerText = `Welcome, ${name} (${phone})`;
+            
+            let whatsappMessage = encodeURIComponent(`New Student Login!\n\nName: ${name}\nPhone: ${phone}\nTime: ${loginTime}`);
+            let whatsappURL = `https://wa.me/${OWNER_WHATSAPP_NUMBER}?text=${whatsappMessage}`;
+            
+            window.open(whatsappURL, '_blank');
+            alert("Login Successful!");
+        })
+        .catch((error) => {
+            localStorage.setItem('active_customer', JSON.stringify(customerObj));
+            document.getElementById('auth-modal').style.display = 'none';
+            document.getElementById('welcome-user-display').innerText = `Welcome, ${name} (${phone})`;
+            alert("Login Successful!");
+        });
     }
 
-    function renderCustomerTable() {
+    function listenToCustomersRealtime() {
+        db.ref('customers').on('value', (snapshot) => {
+            let data = snapshot.val();
+            customersList = [];
+            if (data) {
+                Object.keys(data).forEach(key => {
+                    customersList.push(data[key]);
+                });
+            }
+            renderCustomerTableUI();
+        }, (error) => {
+            console.error(error);
+        });
+    }
+
+    function manualRefreshList() {
+        db.ref('customers').once('value').then((snapshot) => {
+            let data = snapshot.val();
+            customersList = [];
+            if (data) {
+                Object.keys(data).forEach(key => {
+                    customersList.push(data[key]);
+                });
+            }
+            renderCustomerTableUI();
+            alert("List Refreshed Successfully!");
+        }).catch(err => {
+            alert("Failed to refresh list.");
+        });
+    }
+
+    function renderCustomerTableUI() {
         let table = document.getElementById('customer-list-table');
+        let countSpan = document.getElementById('customer-count');
         if(!table) return;
         
-        let html = `<tr><th>Name</th><th>Phone Number</th><th>Date</th></tr>`;
+        countSpan.innerText = customersList.length;
+        let html = `<tr><th>S.No</th><th>Name</th><th>Mobile Number</th><th>Login Date & Time</th></tr>`;
+        
         if (customersList.length === 0) {
-            html += `<tr><td colspan="3" style="text-align:center; color:#777;">No customers registered yet.</td></tr>`;
+            html += `<tr><td colspan="4" style="text-align:center; color:#777;">No customers registered yet.</td></tr>`;
         } else {
-            customersList.forEach(c => {
-                html += `<tr><td>${c.name}</td><td>${c.phone}</td><td>${c.date}</td></tr>`;
+            let total = customersList.length;
+            customersList.slice().reverse().forEach((c, index) => {
+                let sno = total - index;
+                html += `<tr><td><b>${sno}</b></td><td>${c.name}</td><td>${c.phone}</td><td>${c.date}</td></tr>`;
             });
         }
         table.innerHTML = html;
+    }
+
+    function clearAllCustomers() {
+        if(confirm("Are you sure you want to clear all customer records from the database?")) {
+            db.ref('customers').remove().then(() => {
+                localStorage.removeItem('active_customer');
+                alert("All records cleared successfully!");
+                location.reload();
+            });
+        }
     }
 
     function checkExpiryStatus() {
@@ -213,18 +314,22 @@
         if(!adminContainer.classList.contains('hidden')) {
             renderAdminVideoList();
             loadPaymentInputs();
-            renderCustomerTable();
+            manualRefreshList();
         }
     }
 
     function loadPaymentInputs() {
-        document.getElementById('pay-1500-link').value = paymentLinks['1500'] || '';
-        document.getElementById('pay-3000-link').value = paymentLinks['3000'] || '';
+        let p1500 = document.getElementById('pay-1500-link');
+        let p3000 = document.getElementById('pay-3000-link');
+        if(p1500) p1500.value = paymentLinks['1500'] || '';
+        if(p3000) p3000.value = paymentLinks['3000'] || '';
     }
 
     function renderCourses() {
         let gridContainer = document.getElementById('course-buttons-container');
         let targetSelect = document.getElementById('target-course');
+        if(!gridContainer || !targetSelect) return;
+        
         gridContainer.innerHTML = '';
         targetSelect.innerHTML = '';
 
@@ -332,29 +437,34 @@
     }
 
     function proceedToPayment() {
-        let selectedPlan = document.querySelector('input[name="plan"]:checked').value;
+        let selectedPlanEl = document.querySelector('input[name="plan"]:checked');
+        if(!selectedPlanEl) return;
+        let selectedPlan = selectedPlanEl.value;
         let targetPayLink = paymentLinks[selectedPlan];
 
         if(targetPayLink && targetPayLink.trim() !== '') {
             window.open(targetPayLink, '_blank');
+        } else {
+            alert("Payment link not configured by owner.");
+            return;
         }
 
-        let confirmPayment = confirm("Did you complete the payment of Rs. " + selectedPlan + "/-? Click OK once payment is done to unlock the videos.");
-        if (confirmPayment) {
-            let daysToAdd = 60; 
-            let expiryTime = new Date().getTime() + (daysToAdd * 24 * 60 * 60 * 1000);
-            
-            courseData[currentCourse].expiry = expiryTime;
-            saveData();
-            
-            alert("Payment Verified! All videos for " + currentCourse + " are now unlocked for " + daysToAdd + " days.");
-            selectCourse(currentCourse);
-        } else {
-            alert("Payment not verified. Course remains locked.");
-        }
+        // కస్టమర్ పేమెంట్ పూర్తి చేసిన తర్వాత వెంటనే వీడియోలు ఓపెన్ కావడానికి డైరెక్ట్ కన్ఫర్మేషన్ ఆప్షన్
+        setTimeout(() => {
+            let confirmPayment = confirm("మీరు పేమెంట్ విజయవంతంగా పూర్తి చేశారా? 'OK' క్లిక్ చేయగానే వీడియోలు వెంటనే అన్‌లాక్ అవుతాయి.");
+            if (confirmPayment) {
+                let daysToAdd = 60; // 60 రోజుల యాక్సెస్
+                let expiryTime = new Date().getTime() + (daysToAdd * 24 * 60 * 60 * 1000);
+                
+                courseData[currentCourse].expiry = expiryTime;
+                saveData();
+                
+                alert("Payment Verified! అన్ని వీడియోలు సక్సెస్‌ఫుల్‌గా అన్‌లాక్ అయ్యాయి.");
+                selectCourse(currentCourse); // వెంటనే వీడియోలు ప్లే అయ్యే స్క్రీన్‌కి మారుతుంది
+            }
+        }, 1000);
     }
 
-    // Owner Login Function using Gmail and Password
     function verifyOwnerLogin() {
         let email = document.getElementById('owner-email-input').value.trim();
         let password = document.getElementById('owner-password-input').value.trim();
@@ -362,18 +472,20 @@
         if (email === "jayashankar9381@gmail.com" && password === "9381198260") {
             document.getElementById('owner-login-section').classList.add('hidden');
             document.getElementById('owner-dashboard').classList.remove('hidden');
+            manualRefreshList();
         } else {
             alert('Invalid Owner Gmail or Password! Please check your credentials.');
         }
     }
 
     function addNewCourse() {
-        let courseName = document.getElementById('new-course-name').value.trim();
+        let courseNameInput = document.getElementById('new-course-name');
+        let courseName = courseNameInput ? courseNameInput.value.trim() : '';
         if(courseName !== '' && !courseData[courseName]) {
             courseData[courseName] = { videos: [], expiry: null };
             saveData();
             renderCourses();
-            document.getElementById('new-course-name').value = '';
+            courseNameInput.value = '';
             alert("Course added successfully!");
         } else {
             alert("Invalid or already existing course name.");
@@ -382,14 +494,14 @@
 
     function saveYoutubeVideo() {
         let select = document.getElementById('target-course').value;
-        let title = document.getElementById('yt-title').value.trim();
+        let templateTitle = document.getElementById('yt-title').value.trim();
         let link = document.getElementById('yt-link').value.trim();
         
-        if(title !== '' && link !== '') {
+        if(templateTitle !== '' && link !== '') {
             if(!courseData[select].videos) {
                 courseData[select].videos = [];
             }
-            courseData[select].videos.push({ title: title, link: link });
+            courseData[select].videos.push({ title: templateTitle, link: link });
             saveData();
             renderAdminVideoList();
             alert("Video added successfully to " + select + "!");
@@ -406,7 +518,7 @@
         paymentLinks['1500'] = link1500.trim();
         paymentLinks['3000'] = link3000.trim();
         saveData();
-        alert("Payment links updated/replaced successfully!");
+        alert("Payment links updated successfully!");
     }
 
     function shareWebsite() {

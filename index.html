@@ -13,39 +13,35 @@
         .course-btn { padding: 15px 25px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: bold; }
         .course-btn:hover { background: #0056b3; }
         .locked-section { background: #fff3cd; padding: 20px; border: 1px solid #ffeeba; margin-top: 20px; border-radius: 5px; text-align: center; }
-        .unlocked-section { background: #d4edda; padding: 20px; border: 1px solid #c3e6cb; margin-top: 20px; border-radius: 5px; text-align: center; }
+        .unlocked-section { background: #d4edda; padding: 20px; border: 1px solid #c3e6cb; margin-top: 20px; border-radius: 5px; text-align: left; }
         .contact-box { background: #e8f4fd; padding: 15px; margin-top: 30px; border-radius: 5px; text-align: center; border: 1px solid #b8daff; }
         input, button, select { padding: 8px; margin: 5px; font-size: 14px; }
         .hidden { display: none; }
-        /* Corner Floating Owner Login Toggle / Secret button */
         .corner-owner-trigger { position: fixed; top: 10px; right: 10px; background: #333; color: white; padding: 5px 10px; border-radius: 4px; font-size: 12px; cursor: pointer; z-index: 1000; }
+        .video-item { background: #fff; padding: 10px; margin: 8px 0; border-radius: 4px; border: 1px solid #c3e6cb; display: flex; justify-content: space-between; align-items: center; }
     </style>
 </head>
 <body>
 
-<!-- Secret Corner Trigger to access Owner Portal securely -->
 <div class="corner-owner-trigger" onclick="toggleOwnerPortal()">🔐 Owner Portal</div>
 
 <div class="container">
 
-    <!-- Owner / Admin Portal (Completely Hidden from Customers by Default) -->
+    <!-- Owner / Admin Portal -->
     <div id="main-admin-container" class="admin-box hidden">
         <h3>🔐 Owner Portal (Admin Access)</h3>
         
-        <!-- Step 1: WhatsApp Number & OTP Request -->
         <div id="owner-login-section" style="text-align: center;">
             <input type="text" id="owner-whatsapp" placeholder="Enter Owner WhatsApp Number (e.g. 919381198260)">
             <button onclick="sendOwnerWhatsAppOTP()" style="background: #25d366; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Send WhatsApp OTP</button>
         </div>
 
-        <!-- Step 2: OTP Verification Box -->
         <div id="otp-verify-section" class="hidden" style="text-align: center;">
             <p id="otp-status-text" style="color: #007bff; font-weight: bold;">OTP sent to WhatsApp! Enter it below:</p>
             <input type="text" id="entered-otp" placeholder="Enter 4-Digit OTP">
             <button onclick="verifyOwnerOTP()" style="background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">Verify & Open Dashboard</button>
         </div>
         
-        <!-- Step 3: Owner Dashboard (Visible after successful OTP verification) -->
         <div id="owner-dashboard" class="hidden">
             <p style="color: green; font-weight: bold; text-align: center;">✔ Owner Logged In Successfully</p>
             <hr>
@@ -56,10 +52,11 @@
                     <button onclick="addNewCourse()" style="background: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer;">Add Course</button>
                 </div>
                 <div>
-                    <h4>Set Video Link</h4>
+                    <h4>Add Multiple Videos to Course</h4>
                     <select id="target-course"></select><br>
+                    <input type="text" id="yt-title" placeholder="Video Title (e.g. Part 1)"><br>
                     <input type="text" id="yt-link" placeholder="YouTube Video Link"><br>
-                    <button onclick="saveYoutubeLink()" style="background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">Save Video</button>
+                    <button onclick="saveYoutubeVideo()" style="background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">Add Video</button>
                 </div>
                 <div>
                     <h4>Set Payment Links</h4>
@@ -71,17 +68,13 @@
         </div>
     </div>
 
-    <!-- Main Website Header for Customers -->
     <h1>Online Technical Institute</h1>
     <p style="text-align: center;">Select a course below to start learning:</p>
 
-    <!-- Course Buttons Container -->
     <div class="course-grid" id="course-buttons-container"></div>
 
-    <!-- Course Content Area -->
     <div id="course-content" style="margin-top: 30px;"></div>
 
-    <!-- Customer Support & Website Share Section -->
     <div class="contact-box">
         <h3>Have any Doubts or Questions?</h3>
         <p>Contact us directly or send a message on WhatsApp for instant support:</p>
@@ -95,18 +88,41 @@
 </div>
 
 <script>
-    let courseData = {
-        'HTML': { link: '', unlocked: false },
-        'CSS': { link: '', unlocked: false },
-        'Python': { link: '', unlocked: false },
-        'Java': { link: '', unlocked: false }
+    // Load courses and data from localStorage if available
+    let courseData = JSON.parse(localStorage.getItem('institute_courses')) || {
+        'HTML': { videos: [], expiry: null },
+        'CSS': { videos: [], expiry: null },
+        'Python': { videos: [], expiry: null },
+        'Java': { videos: [], expiry: null }
     };
 
-    let paymentLinks = { '1500': '', '3000': '' };
+    let paymentLinks = JSON.parse(localStorage.getItem('institute_paylinks')) || { '1500': '', '3000': '' };
     let currentCourse = '';
-    let generatedOTP = '5432'; // Default secure OTP
+    let generatedOTP = '5432';
 
-    window.onload = function() { renderCourses(); };
+    window.onload = function() { 
+        checkExpiryStatus();
+        renderCourses(); 
+    };
+
+    function checkExpiryStatus() {
+        let now = new Date().getTime();
+        let updated = false;
+        for (let course in courseData) {
+            if (courseData[course].expiry && now > courseData[course].expiry) {
+                courseData[course].expiry = null; // Expired, lock it back
+                updated = true;
+            }
+        }
+        if (updated) {
+            saveData();
+        }
+    }
+
+    function saveData() {
+        localStorage.setItem('institute_courses', JSON.stringify(courseData));
+        localStorage.setItem('institute_paylinks', JSON.stringify(paymentLinks));
+    }
 
     function toggleOwnerPortal() {
         let adminContainer = document.getElementById('main-admin-container');
@@ -135,14 +151,37 @@
 
     function selectCourse(courseName) {
         currentCourse = courseName;
+        checkExpiryStatus();
         let contentDiv = document.getElementById('course-content');
         let data = courseData[courseName];
+        let now = new Date().getTime();
 
-        if (data.unlocked) {
+        let isUnlocked = data.expiry && now < data.expiry;
+
+        if (isUnlocked) {
+            let daysLeft = Math.ceil((data.expiry - now) / (1000 * 60 * 60 * 24));
+            let videosHtml = '';
+            
+            if (data.videos && data.videos.length > 0) {
+                data.videos.forEach((vid, index) => {
+                    videosHtml += `
+                        <div class="video-item">
+                            <span><b>Video ${index + 1}:</b> ${vid.title}</span>
+                            <a href="${vid.link}" target="_blank" style="padding: 6px 12px; background: #007bff; color: white; text-decoration: none; border-radius: 4px; font-weight: bold;">Watch Video</a>
+                        </div>
+                    `;
+                });
+            } else {
+                videosHtml = '<p style="color: red; text-align: center;">Owner has not uploaded videos yet. Please check back soon.</p>';
+            }
+
             contentDiv.innerHTML = `
                 <div class="unlocked-section">
-                    <h2>${courseName} Course Unlocked 🔓</h2>
-                    ${data.link ? `<p><a href="${data.link}" target="_blank" style="font-size: 18px; color: #007bff; font-weight: bold;">👉 Click Here to Watch Course Video</a></p>` : '<p style="color: red;">Owner has not updated the video link yet. Please check back soon.</p>'}
+                    <h2 style="text-align: center; color: #155724;">${courseName} Course Unlocked 🔓</h2>
+                    <p style="text-align: center; font-size: 14px; color: #666;">⏳ Access valid for next <b>${daysLeft} days</b></p>
+                    <hr style="border: 0; border-top: 1px solid #c3e6cb; margin: 15px 0;">
+                    <h3>Course Videos:</h3>
+                    ${videosHtml}
                 </div>
             `;
         } else {
@@ -150,8 +189,8 @@
                 <div class="locked-section">
                     <h2>${courseName} Course is Locked 🔒</h2>
                     <p>Please select a payment plan and complete the payment to unlock permanently:</p>
-                    <label><input type="radio" name="plan" value="1500" checked> Rs. 1500/- (1 Month Access + Certificate)</label><br>
-                    <label><input type="radio" name="plan" value="3000"> Rs. 3000/- (2 Months Access + Certificate)</label><br><br>
+                    <label><input type="radio" name="plan" value="1500" checked> Rs. 1500/- (1 Month / 30 Days Access + Certificate)</label><br>
+                    <label><input type="radio" name="plan" value="3000"> Rs. 3000/- (2 Months / 60 Days Access + Certificate)</label><br><br>
                     <button onclick="proceedToPayment()" style="background: #28a745; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 4px; font-size: 16px;">Complete Payment & Unlock</button>
                 </div>
             `;
@@ -166,10 +205,15 @@
             window.open(targetPayLink, '_blank');
         }
 
-        let confirmPayment = confirm("Did you complete the payment of Rs. " + selectedPlan + "/-? Click OK once payment is done to unlock the video.");
+        let confirmPayment = confirm("Did you complete the payment of Rs. " + selectedPlan + "/-? Click OK once payment is done to unlock the videos.");
         if (confirmPayment) {
-            courseData[currentCourse].unlocked = true;
-            alert("Payment Verified! Video is now unlocked.");
+            let daysToAdd = (selectedPlan === '3000') ? 60 : 30; // 30 days for 1500, 60 days for 3000
+            let expiryTime = new Date().getTime() + (daysToAdd * 24 * 60 * 60 * 1000);
+            
+            courseData[currentCourse].expiry = expiryTime;
+            saveData();
+            
+            alert("Payment Verified! All videos for " + currentCourse + " are now unlocked for " + daysToAdd + " days.");
             selectCourse(currentCourse);
         } else {
             alert("Payment not verified. Course remains locked.");
@@ -181,8 +225,6 @@
         if(wpNumber !== '') {
             let otpMessage = encodeURIComponent("India Class Books OTP: Your Owner Login OTP is " + generatedOTP);
             let whatsappUrl = `https://wa.me/${wpNumber}?text=${otpMessage}`;
-            
-            // Open direct WhatsApp API link so owner gets the message directly on WhatsApp
             window.open(whatsappUrl, '_blank');
 
             document.getElementById('owner-login-section').classList.add('hidden');
@@ -205,7 +247,8 @@
     function addNewCourse() {
         let courseName = document.getElementById('new-course-name').value.trim();
         if(courseName !== '' && !courseData[courseName]) {
-            courseData[courseName] = { link: '', unlocked: false };
+            courseData[courseName] = { videos: [], expiry: null };
+            saveData();
             renderCourses();
             document.getElementById('new-course-name').value = '';
             alert("Course added successfully!");
@@ -214,15 +257,22 @@
         }
     }
 
-    function saveYoutubeLink() {
+    function saveYoutubeVideo() {
         let select = document.getElementById('target-course').value;
-        let link = document.getElementById('yt-link').value;
-        if(link.trim() !== '') {
-            courseData[select].link = link;
-            alert(select + " YouTube video link saved permanently!");
+        let title = document.getElementById('yt-title').value.trim();
+        let link = document.getElementById('yt-link').value.trim();
+        
+        if(title !== '' && link !== '') {
+            if(!courseData[select].videos) {
+                courseData[select].videos = [];
+            }
+            courseData[select].videos.push({ title: title, link: link });
+            saveData();
+            alert("Video added successfully to " + select + "!");
+            document.getElementById('yt-title').value = '';
             document.getElementById('yt-link').value = '';
         } else {
-            alert('Enter a valid link.');
+            alert('Please enter both video title and valid link.');
         }
     }
 
@@ -231,6 +281,7 @@
         let link3000 = document.getElementById('pay-3000-link').value;
         if(link1500.trim() !== '') paymentLinks['1500'] = link1500;
         if(link3000.trim() !== '') paymentLinks['3000'] = link3000;
+        saveData();
         alert("Payment links updated successfully!");
     }
 

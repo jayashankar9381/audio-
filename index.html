@@ -6,14 +6,14 @@
     <title>Online Technical Institute</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f4f4f9; }
-        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        h1, h2, h3 { color: #333; text-align: center; }
+        .container { max-width: 850px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1, h2, h3, h4 { color: #333; text-align: center; }
+        .admin-box { background: #e2e3e5; padding: 20px; margin-bottom: 30px; border-radius: 5px; border-top: 4px solid #007bff; }
         .course-grid { display: flex; gap: 15px; justify-content: center; margin-top: 20px; flex-wrap: wrap; }
-        .course-btn { padding: 15px 25px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
+        .course-btn { padding: 15px 25px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: bold; }
         .course-btn:hover { background: #0056b3; }
         .locked-section { background: #fff3cd; padding: 20px; border: 1px solid #ffeeba; margin-top: 20px; border-radius: 5px; text-align: center; }
         .unlocked-section { background: #d4edda; padding: 20px; border: 1px solid #c3e6cb; margin-top: 20px; border-radius: 5px; text-align: center; }
-        .admin-box { background: #e2e3e5; padding: 20px; margin-top: 40px; border-radius: 5px; border-top: 3px solid #333; }
         .contact-box { background: #e8f4fd; padding: 15px; margin-top: 30px; border-radius: 5px; text-align: center; border: 1px solid #b8daff; }
         input, button, select { padding: 10px; margin: 5px; font-size: 14px; }
         .hidden { display: none; }
@@ -22,15 +22,63 @@
 <body>
 
 <div class="container">
+
+    <!-- Owner / Admin Portal (Placed at the Top as requested) -->
+    <div class="admin-box">
+        <h3>Owner Portal (Admin Access Only)</h3>
+        
+        <!-- Step 1: WhatsApp Number & OTP Verification -->
+        <div id="owner-login-section">
+            <p style="text-align: center; font-size: 13px; color: #555;">Enter WhatsApp number to get OTP and access owner dashboard</p>
+            <div style="text-align: center;">
+                <input type="text" id="owner-whatsapp" placeholder="Enter WhatsApp Number">
+                <button onclick="sendOwnerOTP()" style="background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Send OTP</button>
+            </div>
+        </div>
+
+        <div id="otp-verify-section" class="hidden" style="text-align: center;">
+            <p id="otp-display-msg" style="color: #d9534f; font-weight: bold;"></p>
+            <input type="text" id="entered-otp" placeholder="Enter 4-Digit OTP">
+            <button onclick="verifyOwnerOTP()" style="background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">Verify & Login</button>
+        </div>
+        
+        <!-- Step 2: Owner Dashboard (Visible after successful OTP verification) -->
+        <div id="owner-dashboard" class="hidden">
+            <p style="color: green; font-weight: bold; text-align: center;">✔ Logged in as Owner Successfully</p>
+            
+            <hr>
+            <h4>1. Add New Course</h4>
+            <div style="text-align: center;">
+                <input type="text" id="new-course-name" placeholder="Enter Course Name (e.g. JavaScript)">
+                <button onclick="addNewCourse()" style="background: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer;">Add Course</button>
+            </div>
+
+            <hr style="margin-top: 20px;">
+            <h4>2. Set YouTube Video Link for Course</h4>
+            <div style="text-align: center;">
+                <label>Select Course:</label>
+                <select id="target-course"></select><br>
+                <input type="text" id="yt-link" placeholder="Paste YouTube Video Link here" style="width: 60%;"><br>
+                <button onclick="saveYoutubeLink()" style="background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">Save Video Link</button>
+            </div>
+
+            <hr style="margin-top: 20px;">
+            <h4>3. Set Payment Gateway Links (Fixed for Customers)</h4>
+            <div style="text-align: center;">
+                <input type="text" id="pay-1500-link" placeholder="Enter Payment Link for Rs. 1500 Plan" style="width: 60%;"><br>
+                <input type="text" id="pay-3000-link" placeholder="Enter Payment Link for Rs. 3000 Plan" style="width: 60%;"><br>
+                <button onclick="savePaymentLinks()" style="background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Save Payment Links</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Website Header for Customers -->
     <h1>Online Technical Institute</h1>
     <p style="text-align: center;">Select a course below to start learning:</p>
 
-    <!-- Course Buttons for Customers -->
-    <div class="course-grid">
-        <button class="course-btn" onclick="selectCourse('HTML')">HTML</button>
-        <button class="course-btn" onclick="selectCourse('CSS')">CSS</button>
-        <button class="course-btn" onclick="selectCourse('Python')">Python</button>
-        <button class="course-btn" onclick="selectCourse('Java')">Java</button>
+    <!-- Course Buttons Container -->
+    <div class="course-grid" id="course-buttons-container">
+        <!-- Dynamically loaded course buttons -->
     </div>
 
     <!-- Course Content Area -->
@@ -46,36 +94,6 @@
         </a>
     </div>
 
-    <!-- Owner / Admin Panel (Completely Separate & Hidden from normal view) -->
-    <div class="admin-box">
-        <h3>Owner Portal (Admin Only)</h3>
-        <div id="owner-login-section">
-            <input type="text" id="owner-whatsapp" placeholder="Enter Owner WhatsApp Number">
-            <button onclick="ownerLogin()" style="background: #333; color: white; border: none; cursor: pointer; border-radius: 4px;">Login as Owner</button>
-        </div>
-        
-        <div id="owner-dashboard" class="hidden">
-            <p style="color: green; font-weight: bold;">✔ Logged in as Owner Successfully</p>
-            
-            <hr>
-            <h4>1. Set YouTube Video Links for Courses</h4>
-            <label>Select Course:</label>
-            <select id="target-course">
-                <option value="HTML">HTML</option>
-                <option value="CSS">CSS</option>
-                <option value="Python">Python</option>
-                <option value="Java">Java</option>
-            </select><br>
-            <input type="text" id="yt-link" placeholder="Paste YouTube Video Link here" style="width: 60%;">
-            <button onclick="saveYoutubeLink()" style="background: #28a745; color: white; border: none; cursor: pointer; border-radius: 4px;">Save YouTube Link</button>
-
-            <hr style="margin-top: 20px;">
-            <h4>2. Set Payment Gateway Links</h4>
-            <input type="text" id="pay-1500-link" placeholder="Enter Payment Link for Rs. 1500 Plan" style="width: 60%;"><br>
-            <input type="text" id="pay-3000-link" placeholder="Enter Payment Link for Rs. 3000 Plan" style="width: 60%;"><br>
-            <button onclick="savePaymentLinks()" style="background: #007bff; color: white; border: none; cursor: pointer; border-radius: 4px;">Save Payment Links</button>
-        </div>
-    </div>
 </div>
 
 <script>
@@ -88,11 +106,40 @@
     };
 
     let paymentLinks = {
-        '1500': '#',
-        '3000': '#'
+        '1500': '',
+        '3000': ''
     };
 
     let currentCourse = '';
+    let generatedOTP = '5432';
+
+    // Initialize UI
+    window.onload = function() {
+        renderCourses();
+    };
+
+    function renderCourses() {
+        let gridContainer = document.getElementById('course-buttons-container');
+        let targetSelect = document.getElementById('target-course');
+        
+        gridContainer.innerHTML = '';
+        targetSelect.innerHTML = '';
+
+        for (let course in courseData) {
+            // Render Customer Buttons
+            let btn = document.createElement('button');
+            btn.className = 'course-btn';
+            btn.innerText = course;
+            btn.onclick = function() { selectCourse(course); };
+            gridContainer.appendChild(btn);
+
+            // Render Owner Select Options
+            let opt = document.createElement('option');
+            opt.value = course;
+            opt.innerText = course;
+            targetSelect.appendChild(opt);
+        }
+    }
 
     function selectCourse(courseName) {
         currentCourse = courseName;
@@ -110,7 +157,7 @@
             contentDiv.innerHTML = `
                 <div class="locked-section">
                     <h2>${courseName} Course is Locked 🔒</h2>
-                    <p>Please select a payment plan below and complete payment to unlock:</p>
+                    <p>Please select a payment plan below and complete payment to unlock the video:</p>
                     
                     <label><input type="radio" name="plan" value="1500" checked> Rs. 1500/- (1 Month Access + Certificate)</label><br>
                     <label><input type="radio" name="plan" value="3000"> Rs. 3000/- (2 Months Access + Certificate)</label><br><br>
@@ -125,27 +172,52 @@
         let selectedPlan = document.querySelector('input[name="plan"]:checked').value;
         let targetPayLink = paymentLinks[selectedPlan];
 
-        if(targetPayLink && targetPayLink !== '#') {
+        if(targetPayLink && targetPayLink.trim() !== '') {
             window.open(targetPayLink, '_blank');
-        } else {
-            alert("Redirecting to demo payment gateway for Rs. " + selectedPlan + "/-");
-        }
-
-        // Simulating successful payment after click for testing
-        setTimeout(() => {
-            alert("Payment Successful! Course videos are now unlocked.");
+            // Simulating unlocking after payment gateway redirection
+            alert("Please complete the payment. Video will be unlocked.");
             courseData[currentCourse].unlocked = true;
             selectCourse(currentCourse);
-        }, 1000);
+        } else {
+            alert("Owner has not configured the payment link for Rs. " + selectedPlan + " yet. Please contact support.");
+        }
     }
 
-    function ownerLogin() {
+    // Owner Login Functions with OTP
+    function sendOwnerOTP() {
         let wpNumber = document.getElementById('owner-whatsapp').value;
         if(wpNumber.trim() !== '') {
             document.getElementById('owner-login-section').classList.add('hidden');
-            document.getElementById('owner-dashboard').classList.remove('hidden');
+            document.getElementById('otp-verify-section').classList.remove('hidden');
+            document.getElementById('otp-display-msg').innerText = "India Class Books OTP: Your Owner Login OTP is " + generatedOTP;
         } else {
             alert('Please enter a valid WhatsApp number.');
+        }
+    }
+
+    function verifyOwnerOTP() {
+        let enteredOtp = document.getElementById('entered-otp').value;
+        if(enteredOtp === generatedOTP) {
+            document.getElementById('otp-verify-section').classList.add('hidden');
+            document.getElementById('owner-dashboard').classList.remove('hidden');
+        } else {
+            alert('Invalid OTP. Please enter the correct OTP (5432).');
+        }
+    }
+
+    function addNewCourse() {
+        let courseName = document.getElementById('new-course-name').value.trim();
+        if(courseName !== '') {
+            if(!courseData[courseName]) {
+                courseData[courseName] = { link: '', unlocked: false };
+                renderCourses();
+                document.getElementById('new-course-name').value = '';
+                alert("Course '" + courseName + "' added successfully!");
+            } else {
+                alert("Course already exists!");
+            }
+        } else {
+            alert("Please enter a valid course name.");
         }
     }
 
@@ -154,7 +226,7 @@
         let link = document.getElementById('yt-link').value;
         if(link.trim() !== '') {
             courseData[select].link = link;
-            alert(select + " YouTube link saved successfully!");
+            alert(select + " YouTube link fixed and saved successfully!");
             document.getElementById('yt-link').value = '';
         } else {
             alert('Please enter a valid YouTube link.');
@@ -168,7 +240,7 @@
         if(link1500.trim() !== '') paymentLinks['1500'] = link1500;
         if(link3000.trim() !== '') paymentLinks['3000'] = link3000;
 
-        alert("Payment links updated successfully by Owner!");
+        alert("Payment links fixed and updated successfully by Owner!");
     }
 </script>
 

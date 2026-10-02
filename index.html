@@ -21,9 +21,9 @@
         .video-item { background: #fff; padding: 10px; margin: 8px 0; border-radius: 4px; border: 1px solid #c3e6cb; display: flex; justify-content: space-between; align-items: center; }
         .admin-video-row { background: #fff; padding: 8px; margin: 5px 0; border: 1px solid #ccc; display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
         
-        /* Modal Registration & OTP Popup Styles */
+        /* Modal Registration Popup Styles */
         #auth-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; justify-content: center; align-items: center; z-index: 2000; }
-        .modal-content { background: white; padding: 30px; border-radius: 8px; width: 360px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .modal-content { background: white; padding: 30px; border-radius: 8px; width: 350px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
         .modal-content input { width: 90%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; }
         .modal-content button { width: 95%; background: #007bff; color: white; border: none; padding: 10px; border-radius: 4px; font-weight: bold; cursor: pointer; }
         .customer-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; background: white; }
@@ -33,28 +33,14 @@
 </head>
 <body>
 
-<!-- Customer OTP Login Popup -->
+<!-- Customer Registration Popup -->
 <div id="auth-modal">
     <div class="modal-content">
         <h2>Welcome Student</h2>
-        
-        <!-- Step 1: Name and Valid Phone Input -->
-        <div id="step-details">
-            <p style="font-size: 13px; color: #666;">Enter your real 10-digit mobile number:</p>
-            <input type="text" id="user-reg-name" placeholder="Enter Your Full Name"><br>
-            <input type="text" id="user-reg-phone" placeholder="Enter 10-Digit Mobile Number" maxlength="10"><br>
-            <button onclick="sendOTP()">Get OTP</button>
-        </div>
-
-        <!-- Step 2: OTP Verification -->
-        <div id="step-otp" class="hidden">
-            <p style="font-size: 13px; color: #666;">OTP sent to your mobile. Enter 6-digit OTP below:</p>
-            <div id="otp-display-box" style="background: #e9ecef; padding: 8px; margin: 10px 0; border-radius: 4px; font-size: 14px; font-weight: bold; color: #007bff;"></div>
-            <input type="text" id="user-entered-otp" placeholder="Enter 6-Digit OTP" maxlength="6"><br>
-            <button onclick="verifyOTP()" style="background: #28a745;">Verify & Login</button>
-            <br><br>
-            <a href="#" onclick="resetToDetails()" style="font-size: 12px; color: #007bff; text-decoration: none;">← Change Mobile Number</a>
-        </div>
+        <p style="font-size: 13px; color: #666;">Please enter your details to access the portal:</p>
+        <input type="text" id="user-reg-name" placeholder="Enter Your Full Name"><br>
+        <input type="text" id="user-reg-phone" placeholder="Enter 10-Digit Mobile Number" maxlength="10"><br>
+        <button onclick="registerUser()">Enter Portal</button>
     </div>
 </div>
 
@@ -77,7 +63,7 @@
             <p style="color: green; font-weight: bold; text-align: center;">✔ Owner Logged In Successfully</p>
             <hr>
             
-            <!-- Customer Registrations View with Number-wise List & Count -->
+            <!-- Customer Registrations View with Number-wise List -->
             <div style="background: #fff; padding: 10px; border-radius: 5px; margin-bottom: 20px;">
                 <h4>📋 Joined Students List (Total: <span id="customer-count">0</span>)</h4>
                 <div style="max-height: 180px; overflow-y: auto;">
@@ -150,10 +136,6 @@
     let paymentLinks = JSON.parse(localStorage.getItem('institute_paylinks')) || { '1500': '', '3000': '' };
     let customersList = JSON.parse(localStorage.getItem('institute_customers')) || [];
     let currentCourse = '';
-    
-    let generatedOTP = '';
-    let tempCustomerName = '';
-    let tempCustomerPhone = '';
 
     window.onload = function() { 
         checkUserSession();
@@ -174,7 +156,7 @@
         }
     }
 
-    function sendOTP() {
+    function registerUser() {
         let name = document.getElementById('user-reg-name').value.trim();
         let phone = document.getElementById('user-reg-phone').value.trim();
 
@@ -183,53 +165,27 @@
             return;
         }
 
-        // కఠినమైన మొబైల్ నంబర్ వాలిడేషన్ (భారతదేశ మొబైల్ నంబర్లు 6, 7, 8, 9 తో మొదలవుతాయి మరియు ఒకే నంబర్లు రిపీట్ కాకుండా చూస్తుంది)
+        // కఠినమైన మొబైల్ నంబర్ వాలిడేషన్ (తప్పుడు నంబర్లు లేదా రిపీటెడ్ నంబర్లు బ్లాక్ అవుతాయి)
         let strictPhoneRegex = /^[6-9]\d{9}$/;
         if (!strictPhoneRegex.test(phone) || /^(\d)\1{9}$/.test(phone)) {
-            alert('దయచేసి మీరు వాడే సరైన 10 అంకెల మొబైల్ నంబర్ మాత్రమే ఎంటర్ చేయండి (తప్పుడు లేదా నకిలీ నంబర్లు అనుమతించబడవు).');
+            alert('దయచేసి మీరు వాడే సరైన 10 అంకెల మొబైల్ నంబర్ మాత్రమే ఎంటర్ చేయండి (ఫేక్ లేదా తప్పుడు నంబర్లు అనుమతించబడవు).');
             return;
         }
 
-        tempCustomerName = name;
-        tempCustomerPhone = phone;
+        let customerObj = { 
+            name: name, 
+            phone: phone, 
+            date: new Date().toLocaleString() 
+        };
 
-        // 6 అంకెల OTP జనరేట్ చేయడం
-        generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
+        customersList.push(customerObj);
+        localStorage.setItem('institute_customers', JSON.stringify(customersList));
+        localStorage.setItem('active_customer', JSON.stringify(customerObj));
 
-        document.getElementById('otp-display-box').innerText = `SMS OTP Sent: ${generatedOTP}`;
-        
-        document.getElementById('step-details').classList.add('hidden');
-        document.getElementById('step-otp').classList.remove('hidden');
-    }
-
-    function verifyOTP() {
-        let enteredOTP = document.getElementById('user-entered-otp'].value.trim();
-
-        if (enteredOTP === generatedOTP) {
-            let customerObj = { 
-                name: tempCustomerName, 
-                phone: tempCustomerPhone, 
-                date: new Date().toLocaleString() 
-            };
-
-            customersList.push(customerObj);
-            localStorage.setItem('institute_customers', JSON.stringify(customersList));
-            localStorage.setItem('active_customer', JSON.stringify(customerObj));
-
-            document.getElementById('auth-modal').style.display = 'none';
-            document.getElementById('welcome-user-display').innerText = `Welcome, ${customerObj.name} (${customerObj.phone})`;
-            
-            renderCustomerTable();
-            alert("Login Successful!");
-        } else {
-            alert("తప్పు OTP ఎంటర్ చేసారు! దయచేసి సరైన OTP ఎంటర్ చేయండి.");
-        }
-    }
-
-    function resetToDetails() {
-        document.getElementById('step-otp').classList.add('hidden');
-        document.getElementById('step-details').classList.remove('hidden');
-        document.getElementById('user-entered-otp').value = '';
+        document.getElementById('auth-modal').style.display = 'none';
+        document.getElementById('welcome-user-display').innerText = `Welcome, ${name} (${phone})`;
+        renderCustomerTable();
+        alert("Login Successful!");
     }
 
     function renderCustomerTable() {
@@ -244,7 +200,7 @@
             html += `<tr><td colspan="4" style="text-align:center; color:#777;">No customers registered yet.</td></tr>`;
         } else {
             let total = customersList.length;
-            // నంబర్ వైస్ (Serial Number) రివర్స్ ఆర్డర్ లో చూపించడం
+            // 1, 2, 3.. నంబర్ వైస్ గా రివర్స్ ఆర్డర్ లో చూపించడం (లేటెస్ట్ ఎంట్రీ పైన వస్తుంది)
             customersList.slice().reverse().forEach((c, index) => {
                 let sno = total - index;
                 html += `<tr><td><b>${sno}</b></td><td>${c.name}</td><td>${c.phone}</td><td>${c.date}</td></tr>`;

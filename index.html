@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Online Technical Institute</title>
+    <!-- Google Identity Services Script for Google Login -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
         body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f4f4f9; }
         .container { max-width: 850px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
@@ -23,7 +25,7 @@
         
         /* Modal Registration Popup Styles */
         #auth-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; justify-content: center; align-items: center; z-index: 2000; }
-        .modal-content { background: white; padding: 30px; border-radius: 8px; width: 350px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .modal-content { background: white; padding: 30px; border-radius: 8px; width: 380px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
         .modal-content input { width: 90%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; }
         .modal-content button { width: 95%; background: #007bff; color: white; border: none; padding: 10px; border-radius: 4px; font-weight: bold; cursor: pointer; }
         .customer-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; background: white; }
@@ -33,14 +35,23 @@
 </head>
 <body>
 
-<!-- Customer Registration Popup (Unchanged) -->
+<!-- Customer Registration & Google Login Popup -->
 <div id="auth-modal">
     <div class="modal-content">
         <h2>Welcome Student</h2>
-        <p style="font-size: 13px; color: #666;">Please enter your details to access the portal:</p>
+        <p style="font-size: 13px; color: #666;">Enter your details & sign in with Google:</p>
         <input type="text" id="user-reg-name" placeholder="Enter Your Full Name"><br>
-        <input type="text" id="user-reg-phone" placeholder="Enter Your Phone Number"><br>
-        <button onclick="registerUser()">Enter Portal</button>
+        <input type="text" id="user-reg-phone" placeholder="Enter 10-Digit Phone Number" maxlength="10"><br>
+        <p style="font-size: 12px; color: #555; margin: 5px 0;">Or verify with Google account:</p>
+        <!-- Google Sign In Button Container -->
+        <div id="g_id_onload"
+             data-client_id="YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com"
+             data-callback="handleGoogleLogin"
+             data-auto_prompt="false">
+        </div>
+        <div class="g_id_signin" data-type="standard" data-size="large" data-width="320"></div>
+        <br>
+        <button onclick="registerUserWithDetails()" style="background: #28a745; margin-top: 10px;">Enter Portal with Phone</button>
     </div>
 </div>
 
@@ -48,7 +59,7 @@
 
 <div class="container">
 
-    <!-- Owner / Admin Portal (Updated with Gmail & Password login only) -->
+    <!-- Owner / Admin Portal -->
     <div id="main-admin-container" class="admin-box hidden">
         <h3>🔐 Owner Portal (Admin Access)</h3>
         
@@ -65,13 +76,14 @@
             
             <!-- Customer Registrations View -->
             <div style="background: #fff; padding: 10px; border-radius: 5px; margin-bottom: 20px;">
-                <h4>📋 Customer Registrations List</h4>
-                <div style="max-height: 150px; overflow-y: auto;">
+                <h4>📋 Logged-in Customers List (<span id="customer-count">0</span>)</h4>
+                <div style="max-height: 180px; overflow-y: auto;">
                     <table class="customer-table" id="customer-list-table">
                         <tr>
                             <th>Name</th>
                             <th>Phone Number</th>
-                            <th>Date</th>
+                            <th>Google Gmail</th>
+                            <th>Login Date</th>
                         </tr>
                     </table>
                 </div>
@@ -135,12 +147,14 @@
     let paymentLinks = JSON.parse(localStorage.getItem('institute_paylinks')) || { '1500': '', '3000': '' };
     let customersList = JSON.parse(localStorage.getItem('institute_customers')) || [];
     let currentCourse = '';
+    let tempGoogleUser = null;
 
     window.onload = function() { 
         checkUserSession();
         checkExpiryStatus();
         renderCourses(); 
         loadPaymentInputs();
+        renderCustomerTable();
     };
 
     function checkUserSession() {
@@ -148,41 +162,96 @@
         if (savedUser) {
             let user = JSON.parse(savedUser);
             document.getElementById('auth-modal').style.display = 'none';
-            document.getElementById('welcome-user-display').innerText = `Welcome, ${user.name} (${user.phone})`;
+            document.getElementById('welcome-user-display').innerText = `Welcome, ${user.name} (${user.phone}) - ${user.email || ''}`;
         } else {
             document.getElementById('auth-modal').style.display = 'flex';
         }
     }
 
-    function registerUser() {
+    // Google Login Callback Decoder
+    function handleGoogleLogin(response) {
+        let responsePayload = parseJwt(response.credential);
+        tempGoogleUser = {
+            name: responsePayload.name,
+            email: responsePayload.email,
+            phone: "Google Verified"
+        };
+        
+        // After Google sign-in, prompt for phone number verification to make sure it's valid
+        let phoneInput = prompt("Google account verified (" + responsePayload.email + "). Please enter your valid 10-digit phone number:");
+        if (phoneInput && /^\d{10}$/.test(phoneInput.trim())) {
+            tempGoogleUser.phone = phoneInput.trim();
+            saveAndLoginCustomer(tempGoogleUser);
+        } else {
+            alert("Invalid 10-digit phone number! Login cancelled.");
+        }
+    }
+
+    function parseJwt(token) {
+        let base64Url = token.split('.')[1];
+        let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        let jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+            return '%' + ('0' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        return JSON.parse(jsonPayload);
+    }
+
+    function registerUserWithDetails() {
         let name = document.getElementById('user-reg-name').value.trim();
         let phone = document.getElementById('user-reg-phone').value.trim();
 
-        if (name === '' || phone === '') {
-            alert('Please enter both your name and phone number.');
+        if (name === '') {
+            alert('Please enter your full name.');
             return;
         }
 
-        let customerObj = { name: name, phone: phone, date: new Date().toLocaleDateString() };
-        customersList.push(customerObj);
+        // Strict 10-digit phone number validation
+        let phoneRegex = /^\d{10}$/;
+        if (!phoneRegex.test(phone)) {
+            alert('దయచేసి సరైన 10 అంకెల ఫోన్ నెంబర్ మాత్రమే ఎంటర్ చేయండి! తప్పు నెంబర్ అనుమతించబడదు.');
+            return;
+        }
+
+        let customerObj = { 
+            name: name, 
+            phone: phone, 
+            email: 'N/A (Phone Login)', 
+            date: new Date().toLocaleString() 
+        };
+        
+        saveAndLoginCustomer(customerObj);
+    }
+
+    function saveAndLoginCustomer(customerObj) {
+        // Avoid duplicate records if same phone exists, or add new
+        let existingIndex = customersList.findIndex(c => c.phone === customerObj.phone);
+        if (existingIndex !== -1) {
+            customersList[existingIndex] = customerObj; // update info
+        } else {
+            customersList.push(customerObj);
+        }
+
         localStorage.setItem('institute_customers', JSON.stringify(customersList));
         localStorage.setItem('active_customer', JSON.stringify(customerObj));
 
         document.getElementById('auth-modal').style.display = 'none';
-        document.getElementById('welcome-user-display').innerText = `Welcome, ${name} (${phone})`;
+        document.getElementById('welcome-user-display').innerText = `Welcome, ${customerObj.name} (${customerObj.phone})`;
         renderCustomerTable();
     }
 
     function renderCustomerTable() {
         let table = document.getElementById('customer-list-table');
+        let countSpan = document.getElementById('customer-count');
         if(!table) return;
         
-        let html = `<tr><th>Name</th><th>Phone Number</th><th>Date</th></tr>`;
+        countSpan.innerText = customersList.length;
+        let html = `<tr><th>Name</th><th>Phone Number</th><th>Google Gmail</th><th>Login Date</th></tr>`;
+        
         if (customersList.length === 0) {
-            html += `<tr><td colspan="3" style="text-align:center; color:#777;">No customers registered yet.</td></tr>`;
+            html += `<tr><td colspan="4" style="text-align:center; color:#777;">No customers registered yet.</td></tr>`;
         } else {
             customersList.forEach(c => {
-                html += `<tr><td>${c.name}</td><td>${c.phone}</td><td>${c.date}</td></tr>`;
+                html += `<tr><td>${c.name}</td><td>${c.phone}</td><td>${c.email || 'N/A'}</td><td>${c.date}</td></tr>`;
             });
         }
         table.innerHTML = html;
@@ -354,7 +423,6 @@
         }
     }
 
-    // Owner Login Function using Gmail and Password
     function verifyOwnerLogin() {
         let email = document.getElementById('owner-email-input').value.trim();
         let password = document.getElementById('owner-password-input').value.trim();

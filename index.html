@@ -20,9 +20,29 @@
         .corner-owner-trigger { position: fixed; top: 10px; right: 10px; background: #333; color: white; padding: 5px 10px; border-radius: 4px; font-size: 12px; cursor: pointer; z-index: 1000; }
         .video-item { background: #fff; padding: 10px; margin: 8px 0; border-radius: 4px; border: 1px solid #c3e6cb; display: flex; justify-content: space-between; align-items: center; }
         .admin-video-row { background: #fff; padding: 8px; margin: 5px 0; border: 1px solid #ccc; display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
+        
+        /* Modal Registration Popup Styles */
+        #auth-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; justify-content: center; align-items: center; z-index: 2000; }
+        .modal-content { background: white; padding: 30px; border-radius: 8px; width: 350px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .modal-content input { width: 90%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; }
+        .modal-content button { width: 95%; background: #007bff; color: white; border: none; padding: 10px; border-radius: 4px; font-weight: bold; cursor: pointer; }
+        .customer-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; background: white; }
+        .customer-table th, .customer-table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        .customer-table th { background: #007bff; color: white; }
     </style>
 </head>
 <body>
+
+<!-- Customer Registration Popup -->
+<div id="auth-modal">
+    <div class="modal-content">
+        <h2>Welcome Student</h2>
+        <p style="font-size: 13px; color: #666;">Please enter your details to access the portal:</p>
+        <input type="text" id="user-reg-name" placeholder="Enter Your Full Name"><br>
+        <input type="text" id="user-reg-phone" placeholder="Enter Your Phone Number"><br>
+        <button onclick="registerUser()">Enter Portal</button>
+    </div>
+</div>
 
 <div class="corner-owner-trigger" onclick="toggleOwnerPortal()">🔐 Owner Portal</div>
 
@@ -46,6 +66,21 @@
         <div id="owner-dashboard" class="hidden">
             <p style="color: green; font-weight: bold; text-align: center;">✔ Owner Logged In Successfully</p>
             <hr>
+            
+            <!-- Customer Registrations View -->
+            <div style="background: #fff; padding: 10px; border-radius: 5px; margin-bottom: 20px;">
+                <h4>📋 Customer Registrations List</h4>
+                <div style="max-height: 150px; overflow-y: auto;">
+                    <table class="customer-table" id="customer-list-table">
+                        <tr>
+                            <th>Name</th>
+                            <th>Phone Number</th>
+                            <th>Date</th>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
             <div style="display: flex; justify-content: space-around; flex-wrap: wrap; align-items: flex-start;">
                 <!-- Add Course -->
                 <div>
@@ -74,6 +109,7 @@
     </div>
 
     <h1>Online Technical Institute</h1>
+    <p style="text-align: center;" id="welcome-user-display"></p>
     <p style="text-align: center;">Select a course below to start learning:</p>
 
     <div class="course-grid" id="course-buttons-container"></div>
@@ -101,14 +137,61 @@
     };
 
     let paymentLinks = JSON.parse(localStorage.getItem('institute_paylinks')) || { '1500': '', '3000': '' };
+    let customersList = JSON.parse(localStorage.getItem('institute_customers')) || [];
     let currentCourse = '';
     let generatedOTP = '5432';
 
     window.onload = function() { 
+        checkUserSession();
         checkExpiryStatus();
         renderCourses(); 
         loadPaymentInputs();
     };
+
+    function checkUserSession() {
+        let savedUser = localStorage.getItem('active_customer');
+        if (savedUser) {
+            let user = JSON.parse(savedUser);
+            document.getElementById('auth-modal').style.display = 'none';
+            document.getElementById('welcome-user-display').innerText = `Welcome, ${user.name} (${user.phone})`;
+        } else {
+            document.getElementById('auth-modal').style.display = 'flex';
+        }
+    }
+
+    function registerUser() {
+        let name = document.getElementById('user-reg-name').value.trim();
+        let phone = document.getElementById('user-reg-phone').value.trim();
+
+        if (name === '' || phone === '') {
+            alert('Please enter both your name and phone number.');
+            return;
+        }
+
+        let customerObj = { name: name, phone: phone, date: new Date().toLocaleDateString() };
+        customersList.push(customerObj);
+        localStorage.setItem('institute_customers', JSON.stringify(customersList));
+        localStorage.setItem('active_customer', JSON.stringify(customerObj));
+
+        document.getElementById('auth-modal').style.display = 'none';
+        document.getElementById('welcome-user-display').innerText = `Welcome, ${name} (${phone})`;
+        renderCustomerTable();
+    }
+
+    function renderCustomerTable() {
+        let table = document.getElementById('customer-list-table');
+        if(!table) return;
+        
+        let html = `<tr><th>Name</th><th>Phone Number</th><th>Date</th></tr>`;
+        if (customersList.length === 0) {
+            html += `<tr><td colspan="3" style="text-align:center; color:#777;">No customers registered yet.</td></tr>`;
+        } else {
+            customersList.forEach(c => {
+                html += `<tr><td>${c.name}</td><td>${c.phone}</td><td>${c.date}</td></tr>`;
+            });
+        }
+        table.innerHTML = html;
+    }
 
     function checkExpiryStatus() {
         let now = new Date().getTime();
@@ -135,6 +218,7 @@
         if(!adminContainer.classList.contains('hidden')) {
             renderAdminVideoList();
             loadPaymentInputs();
+            renderCustomerTable();
         }
     }
 
@@ -244,8 +328,8 @@
                 <div class="locked-section">
                     <h2>${courseName} Course is Locked 🔒</h2>
                     <p>Please select a payment plan and complete the payment to unlock permanently:</p>
-                    <label><input type="radio" name="plan" value="1500" checked> Rs. 1500/- (1 Month / 30 Days Access + Certificate)</label><br>
-                    <label><input type="radio" name="plan" value="3000"> Rs. 3000/- (2 Months / 60 Days Access + Certificate)</label><br><br>
+                    <label><input type="radio" name="plan" value="1500" checked> Rs. 1500/- (2 Months Access + Certificate in 1 Month)</label><br>
+                    <label><input type="radio" name="plan" value="3000"> Rs. 3000/- (2 Months Access + Certificate in 1 Week)</label><br><br>
                     <button onclick="proceedToPayment()" style="background: #28a745; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 4px; font-size: 16px;">Complete Payment & Unlock</button>
                 </div>
             `;
@@ -262,7 +346,7 @@
 
         let confirmPayment = confirm("Did you complete the payment of Rs. " + selectedPlan + "/-? Click OK once payment is done to unlock the videos.");
         if (confirmPayment) {
-            let daysToAdd = (selectedPlan === '3000') ? 60 : 30;
+            let daysToAdd = 60; // 2 months access for both
             let expiryTime = new Date().getTime() + (daysToAdd * 24 * 60 * 60 * 1000);
             
             courseData[currentCourse].expiry = expiryTime;

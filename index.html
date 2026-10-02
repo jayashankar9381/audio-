@@ -21,7 +21,6 @@
         input, button, select { padding: 8px; margin: 5px; font-size: 14px; }
         .hidden { display: none; }
         .corner-owner-trigger { position: fixed; top: 10px; right: 10px; background: #333; color: white; padding: 5px 10px; border-radius: 4px; font-size: 12px; cursor: pointer; z-index: 1000; }
-        .video-item { background: #fff; padding: 10px; margin: 8px 0; border-radius: 4px; border: 1px solid #c3e6cb; display: flex; justify-content: space-between; align-items: center; }
         .admin-video-row { background: #fff; padding: 8px; margin: 5px 0; border: 1px solid #ccc; display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
     </style>
 </head>
@@ -93,12 +92,10 @@
 </div>
 
 <script>
-    // Firebase Configuration Setup
     const firebaseConfig = {
         databaseURL: "https://online-technical-institute-default-rtdb.firebaseio.com/"
     };
     
-    // Initialize Firebase safely
     if (!firebase.apps.length) {
         firebase.initializeApp(firebaseConfig);
     }
@@ -233,28 +230,14 @@
 
         if (isUnlocked) {
             let daysLeft = Math.ceil((data.expiry - now) / (1000 * 60 * 60 * 24));
-            let videosHtml = '';
             
-            if (data.videos && data.videos.length > 0) {
-                data.videos.forEach((vid, index) => {
-                    videosHtml += `
-                        <div class="video-item">
-                            <span><b>Video ${index + 1}:</b> ${vid.title}</span>
-                            <a href="${vid.link}" target="_blank" style="padding: 6px 12px; background: #007bff; color: white; text-decoration: none; border-radius: 4px; font-weight: bold;">Watch Video</a>
-                        </div>
-                    `;
-                });
-            } else {
-                videosHtml = '<p style="color: red; text-align: center;">Owner has not uploaded videos yet. Please check back soon.</p>';
-            }
-
             contentDiv.innerHTML = `
-                <div class="unlocked-section">
-                    <h2 style="text-align: center; color: #155724;">${courseName} Course Unlocked 🔓</h2>
-                    <p style="text-align: center; font-size: 14px; color: #666;">⏳ Access valid for next <b>${daysLeft} days</b></p>
+                <div class="unlocked-section" style="text-align: center;">
+                    <h2 style="color: #155724;">${courseName} Course Unlocked Successfully! 🔓</h2>
+                    <p style="font-size: 14px; color: #666;">⏳ మీ కోర్స్ యాక్సెస్ గడువు: మరో <b>${daysLeft} రోజులు</b> ఉంది.</p>
                     <hr style="border: 0; border-top: 1px solid #c3e6cb; margin: 15px 0;">
-                    <h3>Course Videos:</h3>
-                    ${videosHtml}
+                    <p>యూట్యూబ్ వీడియో నేరుగా చూడటానికి కింద ఉన్న బటన్ క్లిక్ చేయండి:</p>
+                    <button onclick="openDirectYouTubeVideo('${courseName}')" style="background: #ff0000; color: white; border: none; padding: 12px 25px; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: bold;">▶ Watch YouTube Video Now</button>
                 </div>
             `;
         } else {
@@ -267,6 +250,15 @@
                     <button onclick="proceedToPayment()" style="background: #28a745; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 4px; font-size: 16px;">Complete Payment & Unlock</button>
                 </div>
             `;
+        }
+    }
+
+    function openDirectYouTubeVideo(courseName) {
+        let data = courseData[courseName];
+        if (data && data.videos && data.videos.length > 0) {
+            window.open(data.videos[0].link, '_blank');
+        } else {
+            alert("Owner has not uploaded videos yet for this course.");
         }
     }
 
@@ -284,7 +276,7 @@
         }
 
         setTimeout(() => {
-            let confirmPayment = confirm("మీరు పేమెంట్ విజయవంతంగా పూర్తి చేశారా? 'OK' క్లిక్ చేయగానే వీడియోలు వెంటనే అన్‌లాక్ అవుతాయి.");
+            let confirmPayment = confirm("మీరు పేమెంట్ విజయవంతంగా పూర్తి చేశారా? 'OK' క్లిక్ చేయగానే యూట్యూబ్ వీడియో నేరుగా ఓపెన్ అవుతుంది.");
             if (confirmPayment) {
                 let daysToAdd = 60; 
                 let expiryTime = new Date().getTime() + (daysToAdd * 24 * 60 * 60 * 1000);
@@ -292,7 +284,14 @@
                 courseData[currentCourse].expiry = expiryTime;
                 saveData();
                 
-                alert("Payment Verified! అన్ని వీడియోలు సక్సెస్‌ఫుల్‌గా అన్‌లాక్ అయ్యాయి.");
+                alert("Payment Verified! కోర్స్ విజయవంతంగా అన్‌లాక్ చేయబడింది.");
+                
+                // పేమెంట్ కన్ఫర్మ్ అయిన వెంటనే ఆటోమేటిక్‌గా యూట్యూబ్ లింక్ ఓపెన్ అయిపోతుంది
+                let data = courseData[currentCourse];
+                if (data && data.videos && data.videos.length > 0) {
+                    window.open(data.videos[0].link, '_blank');
+                }
+                
                 selectCourse(currentCourse);
             }
         }, 1000);

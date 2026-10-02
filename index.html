@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Online Technical Institute</title>
-    <!-- Firebase App & Database CDNs for Cross-Device Syncing -->
+    <!-- Firebase App & Database CDNs -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
@@ -37,7 +37,7 @@
 <body>
 
 <!-- Customer Registration Popup -->
-<div id="auth-modal">
+<div id="auth-modal" class="hidden">
     <div class="modal-content">
         <h2>Welcome Student</h2>
         <p style="font-size: 13px; color: #666;">Please enter your details to access the portal:</p>
@@ -66,7 +66,7 @@
             <p style="color: green; font-weight: bold; text-align: center;">✔ Owner Logged In Successfully</p>
             <hr>
             
-            <!-- Customer Registrations View with Number-wise List & Refresh Option -->
+            <!-- Customer Registrations View -->
             <div style="background: #fff; padding: 10px; border-radius: 5px; margin-bottom: 20px;">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <h4>📋 Joined Students List (Total: <span id="customer-count">0</span>)</h4>
@@ -146,7 +146,6 @@
     }
     const db = firebase.database();
 
-    // మీ వాట్సాప్ నంబర్ ఇక్కడ సెట్ చేయబడింది (919381198260)
     const OWNER_WHATSAPP_NUMBER = "919381198260";
 
     let courseData = JSON.parse(localStorage.getItem('institute_courses')) || {
@@ -161,27 +160,35 @@
     let currentCourse = '';
 
     window.onload = function() { 
-        checkUserSession();
-        checkExpiryStatus();
-        renderCourses(); 
-        loadPaymentInputs();
-        listenToCustomersRealtime();
+        try {
+            checkUserSession();
+            checkExpiryStatus();
+            renderCourses(); 
+            loadPaymentInputs();
+            listenToCustomersRealtime();
+        } catch(e) {
+            console.error("Initialization error: ", e);
+        }
     };
 
     function checkUserSession() {
         let savedUser = localStorage.getItem('active_customer');
+        let modal = document.getElementById('auth-modal');
         if (savedUser) {
             let user = JSON.parse(savedUser);
-            document.getElementById('auth-modal').style.display = 'none';
+            modal.style.display = 'none';
             document.getElementById('welcome-user-display').innerText = `Welcome, ${user.name} (${user.phone})`;
         } else {
-            document.getElementById('auth-modal').style.display = 'flex';
+            modal.style.display = 'flex';
         }
     }
 
     function registerUser() {
-        let name = document.getElementById('user-reg-name').value.trim();
-        let phone = document.getElementById('user-reg-phone').value.trim();
+        let nameInput = document.getElementById('user-reg-name');
+        let phoneInput = document.getElementById('user-reg-phone');
+        
+        let name = nameInput ? nameInput.value.trim() : '';
+        let phone = phoneInput ? phoneInput.value.trim() : '';
 
         if (name === '') {
             alert('దయచేసి మీ పూర్తి పేరు ఎంటర్ చేయండి.');
@@ -208,17 +215,19 @@
             document.getElementById('auth-modal').style.display = 'none';
             document.getElementById('welcome-user-display').innerText = `Welcome, ${name} (${phone})`;
             
-            // కస్టమర్ లాగిన్ అయిన వెంటనే మీ వాట్సాప్‌కి మెసేజ్ పంపే కోడ్ (WhatsApp API)
+            // మీ వాట్సాప్‌కి మెసేజ్ పంపే కోడ్
             let whatsappMessage = encodeURIComponent(`New Student Login!\n\nName: ${name}\nPhone: ${phone}\nTime: ${loginTime}`);
             let whatsappURL = `https://wa.me/${OWNER_WHATSAPP_NUMBER}?text=${whatsappMessage}`;
             
-            // ఒక కొత్త టాబ్‌లో వాట్సాప్ ఓపెన్ అయ్యి మీకు మెసేజ్ వెళ్తుంది
             window.open(whatsappURL, '_blank');
-
-            alert("Login Successful! Redirecting to WhatsApp notification...");
+            alert("Login Successful!");
         })
         .catch((error) => {
-            alert("Connection error. Please try again.");
+            // నెట్‌వర్క్ సమస్య ఉన్నప్పటికీ లోకల్ స్టోరేజ్‌లో సేవ్ అయి లాగిన్ అయ్యేలా ఫాల్‌బ్యాక్
+            localStorage.setItem('active_customer', JSON.stringify(customerObj));
+            document.getElementById('auth-modal').style.display = 'none';
+            document.getElementById('welcome-user-display').innerText = `Welcome, ${name} (${phone})`;
+            alert("Login Successful!");
         });
     }
 
@@ -232,6 +241,8 @@
                 });
             }
             renderCustomerTableUI();
+        }, (error) => {
+            console.error(error);
         });
     }
 
@@ -246,6 +257,8 @@
             }
             renderCustomerTableUI();
             alert("List Refreshed Successfully!");
+        }).catch(err => {
+            alert("Failed to refresh list.");
         });
     }
 
@@ -309,13 +322,17 @@
     }
 
     function loadPaymentInputs() {
-        document.getElementById('pay-1500-link').value = paymentLinks['1500'] || '';
-        document.getElementById('pay-3000-link').value = paymentLinks['3000'] || '';
+        let p1500 = document.getElementById('pay-1500-link');
+        let p3000 = document.getElementById('pay-3000-link');
+        if(p1500) p1500.value = paymentLinks['1500'] || '';
+        if(p3000) p3000.value = paymentLinks['3000'] || '';
     }
 
     function renderCourses() {
         let gridContainer = document.getElementById('course-buttons-container');
         let targetSelect = document.getElementById('target-course');
+        if(!gridContainer || !targetSelect) return;
+        
         gridContainer.innerHTML = '';
         targetSelect.innerHTML = '';
 
@@ -423,7 +440,9 @@
     }
 
     function proceedToPayment() {
-        let selectedPlan = document.querySelector('input[name="plan"]:checked').value;
+        let selectedPlanEl = document.querySelector('input[name="plan"]:checked');
+        if(!selectedPlanEl) return;
+        let selectedPlan = selectedPlanEl.value;
         let targetPayLink = paymentLinks[selectedPlan];
 
         if(targetPayLink && targetPayLink.trim() !== '') {
@@ -459,13 +478,13 @@
     }
 
     function addNewCourse() {
-        let courseName = document.getElementById('new-course-name').value.trim();
+        let courseNameInput = document.getElementById('new-course-name');
+        let courseName = courseNameInput ? courseNameInput.value.trim() : '';
         if(courseName !== '' && !courseData[courseName]) {
             courseData[courseName] = { videos: [], expiry: null };
             saveData();
             renderCourses();
-            document.getElementById('new-course-name', '');
-            document.getElementById('new-course-name').value = '';
+            courseNameInput.value = '';
             alert("Course added successfully!");
         } else {
             alert("Invalid or already existing course name.");

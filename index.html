@@ -65,7 +65,10 @@
             
             <!-- Customer Registrations View with Number-wise List -->
             <div style="background: #fff; padding: 10px; border-radius: 5px; margin-bottom: 20px;">
-                <h4>📋 Joined Students List (Total: <span id="customer-count">0</span>)</h4>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h4>📋 Joined Students List (Total: <span id="customer-count">0</span>)</h4>
+                    <button onclick="clearAllCustomers()" style="background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-size: 11px;">Clear List</button>
+                </div>
                 <div style="max-height: 180px; overflow-y: auto;">
                     <table class="customer-table" id="customer-list-table">
                         <tr>
@@ -165,7 +168,7 @@
             return;
         }
 
-        // కఠినమైన మొబైల్ నంబర్ వాలిడేషన్ (తప్పుడు నంబర్లు లేదా రిపీటెడ్ నంబర్లు బ్లాక్ అవుతాయి)
+        // మొబైల్ నంబర్ వాలిడేషన్
         let strictPhoneRegex = /^[6-9]\d{9}$/;
         if (!strictPhoneRegex.test(phone) || /^(\d)\1{9}$/.test(phone)) {
             alert('దయచేసి మీరు వాడే సరైన 10 అంకెల మొబైల్ నంబర్ మాత్రమే ఎంటర్ చేయండి (ఫేక్ లేదా తప్పుడు నంబర్లు అనుమతించబడవు).');
@@ -178,7 +181,14 @@
             date: new Date().toLocaleString() 
         };
 
-        customersList.push(customerObj);
+        // డూప్లికేట్ నంబర్లు రాకుండా చెక్ చేసి లిస్ట్‌లో యాడ్ చేయడం
+        let existingIndex = customersList.findIndex(c => c.phone === phone);
+        if (existingIndex !== -1) {
+            customersList[existingIndex] = customerObj; // అప్డేట్ అవుతుంది
+        } else {
+            customersList.push(customerObj); // కొత్తది యాడ్ అవుతుంది
+        }
+
         localStorage.setItem('institute_customers', JSON.stringify(customersList));
         localStorage.setItem('active_customer', JSON.stringify(customerObj));
 
@@ -189,6 +199,9 @@
     }
 
     function renderCustomerTable() {
+        // లోకల్ స్టోరేజ్ నుండి లేటెస్ట్ డేటాను మళ్లీ రీలోడ్ చేసుకోవడం (ఇద్దరు ముగ్గురు లాగిన్ అయినా అప్‌డేట్ కావడానికి)
+        customersList = JSON.parse(localStorage.getItem('institute_customers')) || [];
+        
         let table = document.getElementById('customer-list-table');
         let countSpan = document.getElementById('customer-count');
         if(!table) return;
@@ -200,13 +213,23 @@
             html += `<tr><td colspan="4" style="text-align:center; color:#777;">No customers registered yet.</td></tr>`;
         } else {
             let total = customersList.length;
-            // 1, 2, 3.. నంబర్ వైస్ గా రివర్స్ ఆర్డర్ లో చూపించడం (లేటెస్ట్ ఎంట్రీ పైన వస్తుంది)
             customersList.slice().reverse().forEach((c, index) => {
                 let sno = total - index;
                 html += `<tr><td><b>${sno}</b></td><td>${c.name}</td><td>${c.phone}</td><td>${c.date}</td></tr>`;
             });
         }
         table.innerHTML = html;
+    }
+
+    function clearAllCustomers() {
+        if(confirm("Are you sure you want to clear all customer records?")) {
+            customersList = [];
+            localStorage.removeItem('institute_customers');
+            localStorage.removeItem('active_customer');
+            renderCustomerTable();
+            alert("All customer records cleared!");
+            location.reload();
+        }
     }
 
     function checkExpiryStatus() {
@@ -234,7 +257,7 @@
         if(!adminContainer.classList.contains('hidden')) {
             renderAdminVideoList();
             loadPaymentInputs();
-            renderCustomerTable();
+            renderCustomerTable(); // ఓపెన్ చేయగానే లేటెస్ట్ లిస్ట్ లోడ్ అవుతుంది
         }
     }
 
@@ -382,6 +405,7 @@
         if (email === "jayashankar9381@gmail.com" && password === "9381198260") {
             document.getElementById('owner-login-section').classList.add('hidden');
             document.getElementById('owner-dashboard').classList.remove('hidden');
+            renderCustomerTable(); // ఓనర్ లాగిన్ కాగానే లిస్ట్ రిఫ్రెష్ అవుతుంది
         } else {
             alert('Invalid Owner Gmail or Password! Please check your credentials.');
         }

@@ -33,7 +33,7 @@
 </head>
 <body>
 
-<!-- Customer Registration Popup -->
+<!-- Customer Registration Popup (Unchanged) -->
 <div id="auth-modal">
     <div class="modal-content">
         <h2>Welcome Student</h2>
@@ -48,19 +48,15 @@
 
 <div class="container">
 
-    <!-- Owner / Admin Portal -->
+    <!-- Owner / Admin Portal (Updated with Gmail & Password login only) -->
     <div id="main-admin-container" class="admin-box hidden">
         <h3>🔐 Owner Portal (Admin Access)</h3>
         
         <div id="owner-login-section" style="text-align: center;">
-            <input type="text" id="owner-whatsapp" placeholder="Enter Owner WhatsApp Number (e.g. 919381198260)">
-            <button onclick="sendOwnerWhatsAppOTP()" style="background: #25d366; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Send WhatsApp OTP</button>
-        </div>
-
-        <div id="otp-verify-section" class="hidden" style="text-align: center;">
-            <p id="otp-status-text" style="color: #007bff; font-weight: bold;">OTP sent to WhatsApp! Enter it below:</p>
-            <input type="text" id="entered-otp" placeholder="Enter 4-Digit OTP">
-            <button onclick="verifyOwnerOTP()" style="background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">Verify & Open Dashboard</button>
+            <p style="font-size: 13px; color: #555;">Owner Login Panel</p>
+            <input type="email" id="owner-email-input" placeholder="Enter Owner Gmail" value="jayashankar9381@gmail.com" style="width: 80%; padding: 8px; margin: 5px;"><br>
+            <input type="password" id="owner-password-input" placeholder="Enter Password" style="width: 80%; padding: 8px; margin: 5px;"><br>
+            <button onclick="verifyOwnerLogin()" style="background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; padding: 10px 20px; margin-top: 5px;">Owner Login</button>
         </div>
         
         <div id="owner-dashboard" class="hidden">
@@ -139,7 +135,6 @@
     let paymentLinks = JSON.parse(localStorage.getItem('institute_paylinks')) || { '1500': '', '3000': '' };
     let customersList = JSON.parse(localStorage.getItem('institute_customers')) || [];
     let currentCourse = '';
-    let generatedOTP = '5432';
 
     window.onload = function() { 
         checkUserSession();
@@ -346,7 +341,7 @@
 
         let confirmPayment = confirm("Did you complete the payment of Rs. " + selectedPlan + "/-? Click OK once payment is done to unlock the videos.");
         if (confirmPayment) {
-            let daysToAdd = 60; // 2 months access for both
+            let daysToAdd = 60; 
             let expiryTime = new Date().getTime() + (daysToAdd * 24 * 60 * 60 * 1000);
             
             courseData[currentCourse].expiry = expiryTime;
@@ -359,27 +354,16 @@
         }
     }
 
-    function sendOwnerWhatsAppOTP() {
-        let wpNumber = document.getElementById('owner-whatsapp').value.trim();
-        if(wpNumber !== '') {
-            let otpMessage = encodeURIComponent("India Class Books OTP: Your Owner Login OTP is " + generatedOTP);
-            let whatsappUrl = `https://wa.me/${wpNumber}?text=${otpMessage}`;
-            window.open(whatsappUrl, '_blank');
+    // Owner Login Function using Gmail and Password
+    function verifyOwnerLogin() {
+        let email = document.getElementById('owner-email-input').value.trim();
+        let password = document.getElementById('owner-password-input').value.trim();
 
+        if (email === "jayashankar9381@gmail.com" && password === "9381198260") {
             document.getElementById('owner-login-section').classList.add('hidden');
-            document.getElementById('otp-verify-section').classList.remove('hidden');
-        } else {
-            alert('Please enter a valid Owner WhatsApp number.');
-        }
-    }
-
-    function verifyOwnerOTP() {
-        let enteredOtp = document.getElementById('entered-otp').value;
-        if(enteredOtp === generatedOTP) {
-            document.getElementById('otp-verify-section').classList.add('hidden');
             document.getElementById('owner-dashboard').classList.remove('hidden');
         } else {
-            alert('Invalid OTP. Please enter the correct OTP received on WhatsApp (5432).');
+            alert('Invalid Owner Gmail or Password! Please check your credentials.');
         }
     }
 

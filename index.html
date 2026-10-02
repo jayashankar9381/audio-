@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Online Technical Institute</title>
-    <!-- Google Identity Services Script for Google Login -->
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
         body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f4f4f9; }
         .container { max-width: 850px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
@@ -23,9 +21,9 @@
         .video-item { background: #fff; padding: 10px; margin: 8px 0; border-radius: 4px; border: 1px solid #c3e6cb; display: flex; justify-content: space-between; align-items: center; }
         .admin-video-row { background: #fff; padding: 8px; margin: 5px 0; border: 1px solid #ccc; display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
         
-        /* Modal Registration Popup Styles */
+        /* Modal Registration & OTP Popup Styles */
         #auth-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; justify-content: center; align-items: center; z-index: 2000; }
-        .modal-content { background: white; padding: 30px; border-radius: 8px; width: 380px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .modal-content { background: white; padding: 30px; border-radius: 8px; width: 360px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
         .modal-content input { width: 90%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; }
         .modal-content button { width: 95%; background: #007bff; color: white; border: none; padding: 10px; border-radius: 4px; font-weight: bold; cursor: pointer; }
         .customer-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; background: white; }
@@ -35,23 +33,28 @@
 </head>
 <body>
 
-<!-- Customer Registration & Google Login Popup -->
+<!-- Customer OTP Login Popup -->
 <div id="auth-modal">
     <div class="modal-content">
         <h2>Welcome Student</h2>
-        <p style="font-size: 13px; color: #666;">Enter your details & sign in with Google:</p>
-        <input type="text" id="user-reg-name" placeholder="Enter Your Full Name"><br>
-        <input type="text" id="user-reg-phone" placeholder="Enter 10-Digit Phone Number" maxlength="10"><br>
-        <p style="font-size: 12px; color: #555; margin: 5px 0;">Or verify with Google account:</p>
-        <!-- Google Sign In Button Container -->
-        <div id="g_id_onload"
-             data-client_id="YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com"
-             data-callback="handleGoogleLogin"
-             data-auto_prompt="false">
+        
+        <!-- Step 1: Name and Phone Input -->
+        <div id="step-details">
+            <p style="font-size: 13px; color: #666;">Enter your details to receive OTP:</p>
+            <input type="text" id="user-reg-name" placeholder="Enter Your Full Name"><br>
+            <input type="text" id="user-reg-phone" placeholder="Enter 10-Digit Phone Number" maxlength="10"><br>
+            <button onclick="sendOTP()">Get OTP</button>
         </div>
-        <div class="g_id_signin" data-type="standard" data-size="large" data-width="320"></div>
-        <br>
-        <button onclick="registerUserWithDetails()" style="background: #28a745; margin-top: 10px;">Enter Portal with Phone</button>
+
+        <!-- Step 2: OTP Verification -->
+        <div id="step-otp" class="hidden">
+            <p style="font-size: 13px; color: #666;">OTP sent to your phone. Enter 6-digit OTP below:</p>
+            <div id="otp-display-box" style="background: #e9ecef; padding: 8px; margin: 10px 0; border-radius: 4px; font-size: 14px; font-weight: bold; color: #007bff;"></div>
+            <input type="text" id="user-entered-otp" placeholder="Enter 6-Digit OTP" maxlength="6"><br>
+            <button onclick="verifyOTP()" style="background: #28a745;">Verify & Login</button>
+            <br><br>
+            <a href="#" onclick="resetToDetails()" style="font-size: 12px; color: #007bff; text-decoration: none;">← Change Phone Number</a>
+        </div>
     </div>
 </div>
 
@@ -74,16 +77,15 @@
             <p style="color: green; font-weight: bold; text-align: center;">✔ Owner Logged In Successfully</p>
             <hr>
             
-            <!-- Customer Registrations View -->
+            <!-- Customer Registrations View with Real-time count -->
             <div style="background: #fff; padding: 10px; border-radius: 5px; margin-bottom: 20px;">
-                <h4>📋 Logged-in Customers List (<span id="customer-count">0</span>)</h4>
+                <h4>📋 Joined Students List (<span id="customer-count">0</span>)</h4>
                 <div style="max-height: 180px; overflow-y: auto;">
                     <table class="customer-table" id="customer-list-table">
                         <tr>
                             <th>Name</th>
                             <th>Phone Number</th>
-                            <th>Google Gmail</th>
-                            <th>Login Date</th>
+                            <th>Login Date & Time</th>
                         </tr>
                     </table>
                 </div>
@@ -147,7 +149,11 @@
     let paymentLinks = JSON.parse(localStorage.getItem('institute_paylinks')) || { '1500': '', '3000': '' };
     let customersList = JSON.parse(localStorage.getItem('institute_customers')) || [];
     let currentCourse = '';
-    let tempGoogleUser = null;
+    
+    // Temporary variables for OTP handling
+    let generatedOTP = '';
+    let tempCustomerName = '';
+    let tempCustomerPhone = '';
 
     window.onload = function() { 
         checkUserSession();
@@ -162,81 +168,73 @@
         if (savedUser) {
             let user = JSON.parse(savedUser);
             document.getElementById('auth-modal').style.display = 'none';
-            document.getElementById('welcome-user-display').innerText = `Welcome, ${user.name} (${user.phone}) - ${user.email || ''}`;
+            document.getElementById('welcome-user-display').innerText = `Welcome, ${user.name} (${user.phone})`;
         } else {
             document.getElementById('auth-modal').style.display = 'flex';
         }
     }
 
-    // Google Login Callback Decoder
-    function handleGoogleLogin(response) {
-        let responsePayload = parseJwt(response.credential);
-        tempGoogleUser = {
-            name: responsePayload.name,
-            email: responsePayload.email,
-            phone: "Google Verified"
-        };
-        
-        // After Google sign-in, prompt for phone number verification to make sure it's valid
-        let phoneInput = prompt("Google account verified (" + responsePayload.email + "). Please enter your valid 10-digit phone number:");
-        if (phoneInput && /^\d{10}$/.test(phoneInput.trim())) {
-            tempGoogleUser.phone = phoneInput.trim();
-            saveAndLoginCustomer(tempGoogleUser);
-        } else {
-            alert("Invalid 10-digit phone number! Login cancelled.");
-        }
-    }
-
-    function parseJwt(token) {
-        let base64Url = token.split('.')[1];
-        let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        let jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-            return '%' + ('0' + c.charCodeAt(0).toString(16)).slice(-2);
-        }).join(''));
-        return JSON.parse(jsonPayload);
-    }
-
-    function registerUserWithDetails() {
+    function sendOTP() {
         let name = document.getElementById('user-reg-name').value.trim();
         let phone = document.getElementById('user-reg-phone').value.trim();
 
         if (name === '') {
-            alert('Please enter your full name.');
+            alert('దయచేసి మీ పేరు ఎంటర్ చేయండి.');
             return;
         }
 
-        // Strict 10-digit phone number validation
+        // 10 అంకెల మొబైల్ నెంబర్ వాలిడేషన్
         let phoneRegex = /^\d{10}$/;
         if (!phoneRegex.test(phone)) {
-            alert('దయచేసి సరైన 10 అంకెల ఫోన్ నెంబర్ మాత్రమే ఎంటర్ చేయండి! తప్పు నెంబర్ అనుమతించబడదు.');
+            alert('దయచేసి సరైన 10 అంకెల ఫోన్ నెంబర్ మాత్రమే ఎంటర్ చేయండి.');
             return;
         }
 
-        let customerObj = { 
-            name: name, 
-            phone: phone, 
-            email: 'N/A (Phone Login)', 
-            date: new Date().toLocaleString() 
-        };
+        tempCustomerName = name;
+        tempCustomerPhone = phone;
+
+        // 6 అంకెల ఆటోమేటిక్ OTP జనరేట్ చేయడం
+        generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
+
+        // స్క్రీన్ మీద OTP డిస్‌ప్లే చేయడం (డెమో / వెరిఫికేషన్ కోసం)
+        document.getElementById('otp-display-box').innerText = `SMS OTP Sent: ${generatedOTP}`;
         
-        saveAndLoginCustomer(customerObj);
+        // Step 1 నుండి Step 2 (OTP స్క్రీన్) కి మార్చడం
+        document.getElementById('step-details').classList.add('hidden');
+        document.getElementById('step-otp').classList.remove('hidden');
     }
 
-    function saveAndLoginCustomer(customerObj) {
-        // Avoid duplicate records if same phone exists, or add new
-        let existingIndex = customersList.findIndex(c => c.phone === customerObj.phone);
-        if (existingIndex !== -1) {
-            customersList[existingIndex] = customerObj; // update info
-        } else {
+    function verifyOTP() {
+        let enteredOTP = document.getElementById('user-entered-otp').value.trim();
+
+        if (enteredOTP === generatedOTP) {
+            let customerObj = { 
+                name: tempCustomerName, 
+                phone: tempCustomerPhone, 
+                date: new Date().toLocaleString() 
+            };
+
+            // కొత్త కస్టమర్‌ని లిస్ట్‌లో యాప్ చేసి తక్షణమే సేవ్ చేయడం
             customersList.push(customerObj);
+            localStorage.setItem('institute_customers', JSON.stringify(customersList));
+            localStorage.setItem('active_customer', JSON.stringify(customerObj));
+
+            // పాప్-అప్ క్లోజ్ చేయడం
+            document.getElementById('auth-modal').style.display = 'none';
+            document.getElementById('welcome-user-display').innerText = `Welcome, ${customerObj.name} (${customerObj.phone})`;
+            
+            // ఓనర్ డ్యాష్‌బోర్డ్ టేబుల్‌ని వెంటనే అప్‌డేట్ చేయడం
+            renderCustomerTable();
+            alert("Login Successful!");
+        } else {
+            alert("తప్పు OTP ఎంటర్ చేసారు! దయచేసి సరైన OTP ఎంటర్ చేయండి.");
         }
+    }
 
-        localStorage.setItem('institute_customers', JSON.stringify(customersList));
-        localStorage.setItem('active_customer', JSON.stringify(customerObj));
-
-        document.getElementById('auth-modal').style.display = 'none';
-        document.getElementById('welcome-user-display').innerText = `Welcome, ${customerObj.name} (${customerObj.phone})`;
-        renderCustomerTable();
+    function resetToDetails() {
+        document.getElementById('step-otp').classList.add('hidden');
+        document.getElementById('step-details').classList.remove('hidden');
+        document.getElementById('user-entered-otp').value = '';
     }
 
     function renderCustomerTable() {
@@ -245,13 +243,14 @@
         if(!table) return;
         
         countSpan.innerText = customersList.length;
-        let html = `<tr><th>Name</th><th>Phone Number</th><th>Google Gmail</th><th>Login Date</th></tr>`;
+        let html = `<tr><th>Name</th><th>Phone Number</th><th>Login Date & Time</th></tr>`;
         
         if (customersList.length === 0) {
-            html += `<tr><td colspan="4" style="text-align:center; color:#777;">No customers registered yet.</td></tr>`;
+            html += `<tr><td colspan="3" style="text-align:center; color:#777;">No customers registered yet.</td></tr>`;
         } else {
-            customersList.forEach(c => {
-                html += `<tr><td>${c.name}</td><td>${c.phone}</td><td>${c.email || 'N/A'}</td><td>${c.date}</td></tr>`;
+            // లేటెస్ట్ జాయిన్ అయిన కస్టమర్ పైన కనిపించేలా రివర్స్ ఆర్డర్ లో చూపించడం
+            [...customersList].reverse().forEach(c => {
+                html += `<tr><td>${c.name}</td><td>${c.phone}</td><td>${c.date}</td></tr>`;
             });
         }
         table.innerHTML = html;

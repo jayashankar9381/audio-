@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Online Technical Institute</title>
+    <!-- Firebase App & Database CDNs for Cross-Device Syncing -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
         body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f4f4f9; }
         .container { max-width: 850px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
@@ -63,11 +66,14 @@
             <p style="color: green; font-weight: bold; text-align: center;">✔ Owner Logged In Successfully</p>
             <hr>
             
-            <!-- Customer Registrations View with Number-wise List -->
+            <!-- Customer Registrations View with Number-wise List & Refresh Option -->
             <div style="background: #fff; padding: 10px; border-radius: 5px; margin-bottom: 20px;">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <h4>📋 Joined Students List (Total: <span id="customer-count">0</span>)</h4>
-                    <button onclick="clearAllCustomers()" style="background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-size: 11px;">Clear List</button>
+                    <div>
+                        <button onclick="manualRefreshList()" style="background: #28a745; color: white; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-size: 11px; margin-right: 5px;">🔄 Refresh List</button>
+                        <button onclick="clearAllCustomers()" style="background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-size: 11px;">Clear List</button>
+                    </div>
                 </div>
                 <div style="max-height: 180px; overflow-y: auto;">
                     <table class="customer-table" id="customer-list-table">
@@ -129,6 +135,17 @@
 </div>
 
 <script>
+    // Firebase Configuration Setup
+    const firebaseConfig = {
+        databaseURL: "https://online-technical-institute-default-rtdb.firebaseio.com/"
+    };
+    
+    // Initialize Firebase safely
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+    const db = firebase.database();
+
     let courseData = JSON.parse(localStorage.getItem('institute_courses')) || {
         'HTML': { videos: [], expiry: null },
         'CSS': { videos: [], expiry: null },
@@ -137,7 +154,7 @@
     };
 
     let paymentLinks = JSON.parse(localStorage.getItem('institute_paylinks')) || { '1500': '', '3000': '' };
-    let customersList = JSON.parse(localStorage.getItem('institute_customers')) || [];
+    let customersList = [];
     let currentCourse = '';
 
     window.onload = function() { 
@@ -145,7 +162,7 @@
         checkExpiryStatus();
         renderCourses(); 
         loadPaymentInputs();
-        renderCustomerTable();
+        listenToCustomersRealtime();
     };
 
     function checkUserSession() {
@@ -168,10 +185,9 @@
             return;
         }
 
-        // మొబైల్ నంబర్ వాలిడేషన్
         let strictPhoneRegex = /^[6-9]\d{9}$/;
         if (!strictPhoneRegex.test(phone) || /^(\d)\1{9}$/.test(phone)) {
-            alert('దయచేసి మీరు వాడే సరైన 10 అంకెల మొబైల్ నంబర్ మాత్రమే ఎంటర్ చేయండి (ఫేక్ లేదా తప్పుడు నంబర్లు అనుమతించబడవు).');
+            alert('దయచేసి మీరు వాడే సరైన 10 అంకెల మొబైల్ నంబర్ మాత్రమే ఎంటర్ చేయండి.');
             return;
         }
 
@@ -181,27 +197,47 @@
             date: new Date().toLocaleString() 
         };
 
-        // డూప్లికేట్ నంబర్లు రాకుండా చెక్ చేసి లిస్ట్‌లో యాడ్ చేయడం
-        let existingIndex = customersList.findIndex(c => c.phone === phone);
-        if (existingIndex !== -1) {
-            customersList[existingIndex] = customerObj; // అప్డేట్ అవుతుంది
-        } else {
-            customersList.push(customerObj); // కొత్తది యాడ్ అవుతుంది
-        }
-
-        localStorage.setItem('institute_customers', JSON.stringify(customersList));
-        localStorage.setItem('active_customer', JSON.stringify(customerObj));
-
-        document.getElementById('auth-modal').style.display = 'none';
-        document.getElementById('welcome-user-display').innerText = `Welcome, ${name} (${phone})`;
-        renderCustomerTable();
-        alert("Login Successful!");
+        // Firebase క్లౌడ్ డేటాబేస్‌కు డేటాను పంపడం (ఏ మొబైల్ నుంచి లాగిన్ అయినా ఇక్కడ సేవ్ అవుతుంది)
+        db.ref('customers/' + phone).set(customerObj)
+        .then(() => {
+            localStorage.setItem('active_customer', JSON.stringify(customerObj));
+            document.getElementById('auth-modal').style.display = 'none';
+            document.getElementById('welcome-user-display').innerText = `Welcome, ${name} (${phone})`;
+            alert("Login Successful!");
+        })
+        .catch((error) => {
+            alert("Connection error. Please try again.");
+        });
     }
 
-    function renderCustomerTable() {
-        // లోకల్ స్టోరేజ్ నుండి లేటెస్ట్ డేటాను మళ్లీ రీలోడ్ చేసుకోవడం (ఇద్దరు ముగ్గురు లాగిన్ అయినా అప్‌డేట్ కావడానికి)
-        customersList = JSON.parse(localStorage.getItem('institute_customers')) || [];
-        
+    function listenToCustomersRealtime() {
+        db.ref('customers').on('value', (snapshot) => {
+            let data = snapshot.val();
+            customersList = [];
+            if (data) {
+                Object.keys(data).forEach(key => {
+                    customersList.push(data[key]);
+                });
+            }
+            renderCustomerTableUI();
+        });
+    }
+
+    function manualRefreshList() {
+        db.ref('customers').once('value').then((snapshot) => {
+            let data = snapshot.val();
+            customersList = [];
+            if (data) {
+                Object.keys(data).forEach(key => {
+                    customersList.push(data[key]);
+                });
+            }
+            renderCustomerTableUI();
+            alert("List Refreshed Successfully!");
+        });
+    }
+
+    function renderCustomerTableUI() {
         let table = document.getElementById('customer-list-table');
         let countSpan = document.getElementById('customer-count');
         if(!table) return;
@@ -222,13 +258,12 @@
     }
 
     function clearAllCustomers() {
-        if(confirm("Are you sure you want to clear all customer records?")) {
-            customersList = [];
-            localStorage.removeItem('institute_customers');
-            localStorage.removeItem('active_customer');
-            renderCustomerTable();
-            alert("All customer records cleared!");
-            location.reload();
+        if(confirm("Are you sure you want to clear all customer records from the database?")) {
+            db.ref('customers').remove().then(() => {
+                localStorage.removeItem('active_customer');
+                alert("All records cleared successfully!");
+                location.reload();
+            });
         }
     }
 
@@ -257,7 +292,7 @@
         if(!adminContainer.classList.contains('hidden')) {
             renderAdminVideoList();
             loadPaymentInputs();
-            renderCustomerTable(); // ఓపెన్ చేయగానే లేటెస్ట్ లిస్ట్ లోడ్ అవుతుంది
+            manualRefreshList();
         }
     }
 
@@ -405,7 +440,7 @@
         if (email === "jayashankar9381@gmail.com" && password === "9381198260") {
             document.getElementById('owner-login-section').classList.add('hidden');
             document.getElementById('owner-dashboard').classList.remove('hidden');
-            renderCustomerTable(); // ఓనర్ లాగిన్ కాగానే లిస్ట్ రిఫ్రెష్ అవుతుంది
+            manualRefreshList();
         } else {
             alert('Invalid Owner Gmail or Password! Please check your credentials.');
         }
@@ -426,14 +461,14 @@
 
     function saveYoutubeVideo() {
         let select = document.getElementById('target-course').value;
-        let title = document.getElementById('yt-title').value.trim();
+        let templateTitle = document.getElementById('yt-title').value.trim();
         let link = document.getElementById('yt-link').value.trim();
         
-        if(title !== '' && link !== '') {
+        if(templateTitle !== '' && link !== '') {
             if(!courseData[select].videos) {
                 courseData[select].videos = [];
             }
-            courseData[select].videos.push({ title: title, link: link });
+            courseData[select].videos.push({ title: templateTitle, link: link });
             saveData();
             renderAdminVideoList();
             alert("Video added successfully to " + select + "!");
@@ -450,7 +485,7 @@
         paymentLinks['1500'] = link1500.trim();
         paymentLinks['3000'] = link3000.trim();
         saveData();
-        alert("Payment links updated/replaced successfully!");
+        alert("Payment links updated successfully!");
     }
 
     function shareWebsite() {

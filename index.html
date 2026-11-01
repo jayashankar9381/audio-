@@ -3,368 +3,564 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Online Technical Institute</title>
-    <!-- Firebase App & Database CDNs -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f4f4f9; }
-        .container { max-width: 850px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        h1, h2, h3, h4 { color: #333; text-align: center; }
-        .admin-box { background: #e9ecef; padding: 15px; margin-bottom: 25px; border-radius: 6px; border: 2px dashed #007bff; }
-        .course-grid { display: flex; gap: 15px; justify-content: center; margin-top: 20px; flex-wrap: wrap; }
-        .course-btn { padding: 15px 25px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: bold; }
-        .course-btn:hover { background: #0056b3; }
-        .locked-section { background: #fff3cd; padding: 20px; border: 1px solid #ffeeba; margin-top: 20px; border-radius: 5px; text-align: center; }
-        .unlocked-section { background: #d4edda; padding: 20px; border: 1px solid #c3e6cb; margin-top: 20px; border-radius: 5px; text-align: left; }
-        .contact-box { background: #e8f4fd; padding: 15px; margin-top: 30px; border-radius: 5px; text-align: center; border: 1px solid #b8daff; }
-        input, button, select { padding: 8px; margin: 5px; font-size: 14px; }
-        .hidden { display: none; }
-        .corner-owner-trigger { position: fixed; top: 10px; right: 10px; background: #333; color: white; padding: 5px 10px; border-radius: 4px; font-size: 12px; cursor: pointer; z-index: 1000; }
-        .admin-video-row { background: #fff; padding: 8px; margin: 5px 0; border: 1px solid #ccc; display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
-    </style>
+    <title>AI Audio Book Studio & E-Book Store</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body>
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans">
 
-<div class="corner-owner-trigger" onclick="toggleOwnerPortal()">🔐 Owner Portal</div>
-
-<div class="container">
-
-    <!-- Owner / Admin Portal -->
-    <div id="main-admin-container" class="admin-box hidden">
-        <h3>🔐 Owner Portal (Admin Access)</h3>
-        
-        <div id="owner-login-section" style="text-align: center;">
-            <p style="font-size: 13px; color: #555;">Owner Login Panel</p>
-            <input type="email" id="owner-email-input" placeholder="Enter Owner Gmail" value="jayashankar9381@gmail.com" style="width: 80%; padding: 8px; margin: 5px;"><br>
-            <input type="password" id="owner-password-input" placeholder="Enter Password" style="width: 80%; padding: 8px; margin: 5px;"><br>
-            <button onclick="verifyOwnerLogin()" style="background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; padding: 10px 20px; margin-top: 5px;">Owner Login</button>
+    <!-- Top Navigation Bar -->
+    <nav class="bg-slate-900 border-b border-slate-800 p-4 sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-2 cursor-pointer" onclick="showCustomerView()">
+                <i data-lucide="book-open-check" class="text-indigo-500 w-7 h-7"></i>
+                <h1 class="text-xl font-extrabold text-white">AI E-Book Studio</h1>
+            </div>
+            
+            <div class="flex gap-2">
+                <button onclick="showCustomerView()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold transition flex items-center gap-1">
+                    <i data-lucide="store" class="w-4 h-4"></i> Customer Store
+                </button>
+                <button onclick="showOwnerLogin()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1 shadow-md shadow-indigo-600/30">
+                    <i data-lucide="shield-check" class="w-4 h-4"></i> Owner Portal
+                </button>
+            </div>
         </div>
-        
-        <div id="owner-dashboard" class="hidden">
-            <p style="color: green; font-weight: bold; text-align: center;">✔ Owner Logged In Successfully</p>
-            <hr>
+    </nav>
 
-            <div style="display: flex; justify-content: space-around; flex-wrap: wrap; align-items: flex-start;">
-                <!-- Add Course -->
+    <main class="max-w-5xl mx-auto p-4 md:p-8">
+
+        <!-- ==================== 1. OWNER LOGIN VIEW ==================== -->
+        <section id="owner-login-view" class="hidden max-w-md mx-auto bg-slate-900 p-6 md:p-8 rounded-3xl border border-slate-800 shadow-2xl space-y-6">
+            <div class="text-center space-y-2">
+                <h2 class="text-2xl font-bold text-white">Owner Portal Login</h2>
+                <p class="text-xs text-slate-400">Restricted access for store owner only</p>
+            </div>
+
+            <div class="space-y-4">
                 <div>
-                    <h4>Add New Course</h4>
-                    <input type="text" id="new-course-name" placeholder="Course Name"><br>
-                    <button onclick="addNewCourse()" style="background: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer;">Add Course</button>
+                    <label class="block text-xs font-bold text-slate-300 mb-1">Owner Email</label>
+                    <input type="email" id="owner-email" value="jayashankar9381@gmail.com" class="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
                 </div>
-                <!-- Manage Videos -->
                 <div>
-                    <h4>Manage Videos</h4>
-                    <select id="target-course" onchange="renderAdminVideoList()"></select><br>
-                    <input type="text" id="yt-title" placeholder="Video Title (e.g. Part 1)"><br>
-                    <input type="text" id="yt-link" placeholder="YouTube Video Link"><br>
-                    <button onclick="saveYoutubeVideo()" style="background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">Add Video</button>
-                    <div id="admin-video-list" style="margin-top: 10px; max-height: 150px; overflow-y: auto;"></div>
+                    <label class="block text-xs font-bold text-slate-300 mb-1">PIN / Password</label>
+                    <input type="password" id="owner-pass" value="9381" class="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
                 </div>
-                <!-- Manage Payment Links -->
-                <div>
-                    <h4>Set / Update Pay Links</h4>
-                    <input type="text" id="pay-1500-link" placeholder="1500 Plan Pay Link"><br>
-                    <input type="text" id="pay-3000-link" placeholder="3000 Plan Pay Link"><br>
-                    <button onclick="savePaymentLinks()" style="background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Update Pay Links</button>
+
+                <div class="flex justify-between items-center text-xs">
+                    <button onclick="openForgotModal()" class="text-indigo-400 hover:underline">Forgot Password?</button>
+                    <button onclick="showCustomerView()" class="text-slate-400 hover:underline">Back to Store</button>
+                </div>
+
+                <button onclick="handleOwnerLogin()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 font-bold rounded-xl text-sm shadow-lg shadow-indigo-600/30 transition">
+                    Login to Dashboard
+                </button>
+            </div>
+        </section>
+
+        <!-- FORGOT PASSWORD MODAL -->
+        <div id="forgot-modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
+            <div class="bg-slate-900 border border-slate-800 max-w-sm w-full p-6 rounded-3xl space-y-4">
+                <h3 class="text-lg font-bold text-white">Reset Owner Password</h3>
+                <p class="text-xs text-slate-400">OTP sent to <b>jayashankar9381@gmail.com</b> (OTP: <b>938100</b>)</p>
+
+                <input type="text" id="otp-input" placeholder="Enter OTP (938100)" class="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm">
+                <input type="password" id="new-pin-1" placeholder="New Password / PIN" class="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm">
+                <input type="password" id="new-pin-2" placeholder="Confirm Password / PIN" class="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm">
+
+                <div class="flex gap-2">
+                    <button onclick="closeForgotModal()" class="w-1/2 py-2.5 bg-slate-800 text-slate-300 rounded-xl text-xs font-bold">Cancel</button>
+                    <button onclick="resetPassword()" class="w-1/2 py-2.5 bg-indigo-600 text-white rounded-xl text-xs font-bold">Confirm PIN</button>
                 </div>
             </div>
         </div>
-    </div>
 
-    <h1>Online Technical Institute</h1>
-    <p style="text-align: center;">Select a course below to start learning:</p>
+        <!-- ==================== 2. OWNER DASHBOARD VIEW ==================== -->
+        <section id="owner-dashboard-view" class="hidden space-y-8">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-4">
+                <div>
+                    <h2 class="text-2xl font-bold text-white">Owner Management Board</h2>
+                    <p class="text-xs text-slate-400">Upload, delete books and track reader counts</p>
+                </div>
+                <button onclick="showCustomerView()" class="px-3 py-1.5 bg-red-500/20 text-red-400 text-xs font-bold rounded-lg border border-red-500/30">Logout / Exit</button>
+            </div>
 
-    <div class="course-grid" id="course-buttons-container"></div>
+            <!-- Upload Separate Book Form -->
+            <div class="bg-slate-900 p-6 rounded-3xl border border-slate-800 space-y-4">
+                <h3 class="text-lg font-bold text-indigo-400 flex items-center gap-2">
+                    <i data-lucide="plus-circle" class="w-5 h-5"></i> Publish New Separate Book
+                </h3>
 
-    <div id="course-content" style="margin-top: 30px;"></div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 mb-1">Book Title (Unique)</label>
+                        <input type="text" id="book-title" placeholder="e.g. Tenali Raman Stories" class="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 mb-1">Price (₹)</label>
+                        <input type="number" id="book-price" placeholder="299" class="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm">
+                    </div>
+                </div>
 
-    <div class="contact-box">
-        <h3>Have any Doubts or Questions?</h3>
-        <p>Contact us directly or send a message on WhatsApp for instant support:</p>
-        <p>📞 <b>Phone / WhatsApp:</b> <a href="https://wa.me/919381198260" target="_blank" style="color: #28a745; font-weight: bold; text-decoration: none;">+91 93811 98260</a></p>
-        <a href="https://wa.me/919381198260?text=Hello,%20I%20have%20a%20doubt%20regarding%20the%20course." target="_blank">
-            <button style="background: #25d366; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; margin-right: 10px;">Chat on WhatsApp</button>
-        </a>
-        <button onclick="shareWebsite()" style="background: #007bff; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold;">📤 Share Website</button>
-    </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 mb-1">Payment Gateway / PhonePe UPI Link / ID</label>
+                    <input type="text" id="book-paylink" placeholder="upi://pay?pa=owner@upi&pn=Owner" class="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm">
+                </div>
 
-</div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 mb-1">Book Content / Text</label>
+                    <textarea id="book-content" rows="5" placeholder="Enter book contents here..." class="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm"></textarea>
+                </div>
 
-<script>
-    const firebaseConfig = {
-        databaseURL: "https://online-technical-institute-default-rtdb.firebaseio.com/"
-    };
-    
-    if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-    }
-    const db = firebase.database();
+                <button onclick="saveBook()" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 font-bold rounded-xl text-sm shadow-lg shadow-indigo-600/30 transition flex items-center justify-center gap-2">
+                    <i data-lucide="save" class="w-4 h-4"></i> Save Separate Book
+                </button>
+            </div>
 
-    let courseData = JSON.parse(localStorage.getItem('institute_courses')) || {
-        'HTML': { videos: [], expiry: null },
-        'CSS': { videos: [], expiry: null },
-        'Python': { videos: [], expiry: null },
-        'Java': { videos: [], expiry: null }
-    };
+            <!-- Published Books Analytics & Delete Action -->
+            <div class="space-y-4">
+                <h3 class="text-lg font-bold text-white">Published Books Management</h3>
+                <div id="owner-books-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Dynamic Books with Delete Button -->
+                </div>
+            </div>
+        </section>
 
-    let paymentLinks = JSON.parse(localStorage.getItem('institute_paylinks')) || { '1500': '', '3000': '' };
-    let currentCourse = '';
+        <!-- ==================== 3. CUSTOMER STORE VIEW ==================== -->
+        <section id="customer-store-view" class="space-y-6">
+            <!-- Language Selector Bar -->
+            <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 flex flex-wrap items-center justify-between gap-4">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="globe" class="text-indigo-400 w-5 h-5"></i>
+                    <span class="text-xs font-bold text-slate-300">Interface Language:</span>
+                    <select id="ui-lang" onchange="changeInterfaceLanguage()" class="bg-slate-950 border border-slate-700 p-2 rounded-xl text-xs text-indigo-300 font-bold">
+                        <option value="en" selected>English (Default)</option>
+                        <option value="te">తెలుగు (Telugu)</option>
+                        <option value="hi">हिंदी (Hindi)</option>
+                        <option value="ta">தமிழ் (Tamil)</option>
+                        <option value="kn">ಕನ್ನಡ (Kannada)</option>
+                        <option value="ml">മലയാളം (Malayalam)</option>
+                    </select>
+                </div>
 
-    window.onload = function() { 
-        try {
-            checkExpiryStatus();
-            renderCourses(); 
-            loadPaymentInputs();
-        } catch(e) {
-            console.error("Initialization error: ", e);
+                <button onclick="googleLogin()" class="px-4 py-2 bg-slate-800 border border-slate-700 hover:bg-slate-700 rounded-xl text-xs font-bold flex items-center gap-2">
+                    <i data-lucide="user" class="w-4 h-4 text-emerald-400"></i> <span id="user-status">Sign in with Google</span>
+                </button>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="relative">
+                <i data-lucide="search" class="absolute left-4 top-3.5 text-slate-500 w-5 h-5"></i>
+                <input type="text" id="search-input" onkeyup="filterBooks()" placeholder="Search books by title..." class="w-full pl-12 pr-4 py-3 bg-slate-900 border border-slate-800 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            </div>
+
+            <!-- Customer Store Grid -->
+            <div id="customer-books-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Books Rendered Here -->
+            </div>
+        </section>
+
+        <!-- PAYMENT MODAL FOR CUSTOMER WITH PHONEPE / UPI AUTO-OPEN -->
+        <div id="payment-modal" class="hidden fixed inset-0 bg-black/85 flex items-center justify-center p-4 z-50">
+            <div class="bg-slate-900 border border-slate-800 max-w-sm w-full p-6 rounded-3xl space-y-4 text-center">
+                <i data-lucide="lock" class="w-12 h-12 text-amber-400 mx-auto"></i>
+                <h3 id="pay-book-title" class="text-lg font-bold text-white"></h3>
+                <p class="text-xs text-slate-400">Pay amount to get <b>30 Days Full Access</b> (PhonePe / Google Pay / UPI).</p>
+
+                <div class="text-3xl font-extrabold text-emerald-400" id="pay-book-price"></div>
+
+                <div class="flex flex-col gap-2 pt-2">
+                    <button onclick="triggerUPIPayment()" class="py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-2">
+                        <i data-lucide="smartphone" class="w-4 h-4"></i> Pay via PhonePe / UPI (30 Days)
+                    </button>
+                    <button onclick="closePayModal()" class="py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold border border-slate-700">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- UNLOCKED BOOK READER MODAL -->
+        <div id="reader-modal" class="hidden fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50 overflow-y-auto">
+            <div class="bg-slate-900 border border-slate-800 max-w-2xl w-full p-6 rounded-3xl space-y-6 my-8">
+                <!-- Header -->
+                <div class="flex justify-between items-start border-b border-slate-800 pb-3">
+                    <div>
+                        <h3 id="reader-title" class="text-xl font-bold text-indigo-400"></h3>
+                        <span id="validity-badge" class="text-[10px] bg-emerald-500/20 text-emerald-400 px-2.5 py-0.5 rounded-full font-bold">30 Days Active Access</span>
+                    </div>
+                    <button onclick="closeReaderModal()" class="p-2 bg-slate-800 hover:bg-slate-700 rounded-xl">
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                    </button>
+                </div>
+
+                <!-- Voice & Instant Language Switcher -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-950 p-4 rounded-2xl border border-slate-800">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 mb-1">Audio Voice & Language:</label>
+                        <select id="audio-lang" onchange="onLanguageOrVoiceChange()" class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-indigo-300 font-bold">
+                            <option value="te-IN" selected>తెలుగు (Telugu)</option>
+                            <option value="hi-IN">हिंदी (Hindi)</option>
+                            <option value="en-US">English (US)</option>
+                            <option value="ta-IN">தமிழ் (Tamil)</option>
+                            <option value="kn-IN">ಕನ್ನಡ (Kannada)</option>
+                            <option value="ml-IN">മലയാളം (Malayalam)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 mb-1">Customer Mode:</label>
+                        <div class="flex gap-2">
+                            <button id="btn-mode-read" onclick="setMode('read')" class="flex-1 py-2 bg-indigo-600 text-white rounded-xl text-xs font-bold">📖 Reading</button>
+                            <button id="btn-mode-listen" onclick="setMode('listen')" class="flex-1 py-2 bg-slate-800 text-slate-400 rounded-xl text-xs font-bold">🎧 Listening</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Text Scroll Box -->
+                <div class="bg-slate-950 p-5 rounded-2xl border border-slate-800 max-h-60 overflow-y-auto">
+                    <p id="reader-content-text" class="text-sm text-slate-300 leading-relaxed whitespace-pre-line"></p>
+                </div>
+
+                <!-- Controls with Skipping and Native Share -->
+                <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-3">
+                    <div class="flex items-center justify-center gap-4">
+                        <button onclick="skipAudio(-10)" class="p-3 bg-slate-800 hover:bg-slate-700 text-indigo-300 rounded-xl text-xs font-bold flex items-center gap-1">
+                            <i data-lucide="rotate-ccw" class="w-4 h-4"></i> -10s
+                        </button>
+
+                        <button onclick="toggleAudio()" id="play-btn" class="p-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl shadow-lg shadow-indigo-600/30">
+                            <i data-lucide="play" class="w-6 h-6"></i>
+                        </button>
+
+                        <button onclick="skipAudio(10)" class="p-3 bg-slate-800 hover:bg-slate-700 text-indigo-300 rounded-xl text-xs font-bold flex items-center gap-1">
+                            +10s <i data-lucide="rotate-cw" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+
+                    <div class="flex justify-between items-center pt-2 border-t border-slate-900">
+                        <span id="audio-status" class="text-xs text-indigo-400 font-semibold">Audio Player Ready</span>
+                        <button onclick="perfectShareBook()" class="px-3.5 py-2 bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 rounded-xl text-xs font-bold flex items-center gap-1.5 transition">
+                            <i data-lucide="share-2" class="w-4 h-4"></i> Share Book
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        let currentOwnerPin = "9381";
+        let books = JSON.parse(localStorage.getItem('published_books')) || [
+            {
+                id: 1,
+                title: "AI & Future Stories",
+                price: 199,
+                paylink: "upi://pay?pa=jayashankar9381@ybl&pn=Jayashankar&am=199&cu=INR",
+                content: "ఇది ఒక అద్భుతమైన AI ఆడియో పుస్తకం. మీరు దీనిని నేరుగా చదవవచ్చు మరియు ఏ భారతీయ భాషలోనైనా వెంటనే ఆటోమేటిక్‌గా వినవచ్చు.",
+                readersCount: 11
+            }
+        ];
+
+        // 30 Days Expiry Access Manager Storage
+        let userPurchases = JSON.parse(localStorage.getItem('user_purchases')) || {};
+
+        let selectedBookForPay = null;
+        let selectedBookForRead = null;
+        let currentCharIndex = 0;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            showCustomerView();
+        });
+
+        function showCustomerView() {
+            window.speechSynthesis.cancel();
+            document.getElementById('owner-login-view').classList.add('hidden');
+            document.getElementById('owner-dashboard-view').classList.add('hidden');
+            document.getElementById('customer-store-view').classList.remove('hidden');
+            renderCustomerBooks();
         }
-    };
 
-    function checkExpiryStatus() {
-        let now = new Date().getTime();
-        let updated = false;
-        for (let course in courseData) {
-            if (courseData[course].expiry && now > courseData[course].expiry) {
-                courseData[course].expiry = null; 
-                updated = true;
+        function showOwnerLogin() {
+            window.speechSynthesis.cancel();
+            document.getElementById('customer-store-view').classList.add('hidden');
+            document.getElementById('owner-dashboard-view').classList.add('hidden');
+            document.getElementById('owner-login-view').classList.remove('hidden');
+        }
+
+        function handleOwnerLogin() {
+            const email = document.getElementById('owner-email').value;
+            const pass = document.getElementById('owner-pass').value;
+
+            if(email === "jayashankar9381@gmail.com" && pass === currentOwnerPin) {
+                alert("Login Success!");
+                document.getElementById('owner-login-view').classList.add('hidden');
+                document.getElementById('owner-dashboard-view').classList.remove('hidden');
+                renderOwnerBooks();
+            } else {
+                alert("Invalid Credentials!");
             }
         }
-        if (updated) {
-            saveData();
-        }
-    }
 
-    function saveData() {
-        localStorage.setItem('institute_courses', JSON.stringify(courseData));
-        localStorage.setItem('institute_paylinks', JSON.stringify(paymentLinks));
-    }
+        function openForgotModal() { document.getElementById('forgot-modal').classList.remove('hidden'); }
+        function closeForgotModal() { document.getElementById('forgot-modal').classList.add('hidden'); }
 
-    function toggleOwnerPortal() {
-        let adminContainer = document.getElementById('main-admin-container');
-        adminContainer.classList.toggle('hidden');
-        if(!adminContainer.classList.contains('hidden')) {
-            renderAdminVideoList();
-            loadPaymentInputs();
-        }
-    }
+        function resetPassword() {
+            const otp = document.getElementById('otp-input').value;
+            const p1 = document.getElementById('new-pin-1').value;
+            const p2 = document.getElementById('new-pin-2').value;
 
-    function loadPaymentInputs() {
-        let p1500 = document.getElementById('pay-1500-link');
-        let p3000 = document.getElementById('pay-3000-link');
-        if(p1500) p1500.value = paymentLinks['1500'] || '';
-        if(p3000) p3000.value = paymentLinks['3000'] || '';
-    }
+            if(otp !== "938100") { alert("Invalid OTP!"); return; }
+            if(!p1 || p1 !== p2) { alert("PINs do not match!"); return; }
 
-    function renderCourses() {
-        let gridContainer = document.getElementById('course-buttons-container');
-        let targetSelect = document.getElementById('target-course');
-        if(!gridContainer || !targetSelect) return;
-        
-        gridContainer.innerHTML = '';
-        targetSelect.innerHTML = '';
-
-        for (let course in courseData) {
-            let btn = document.createElement('button');
-            btn.className = 'course-btn';
-            btn.innerText = course;
-            btn.onclick = function() { selectCourse(course); };
-            gridContainer.appendChild(btn);
-
-            let opt = document.createElement('option');
-            opt.value = course;
-            opt.innerText = course;
-            targetSelect.appendChild(opt);
-        }
-        renderAdminVideoList();
-    }
-
-    function renderAdminVideoList() {
-        let select = document.getElementById('target-course');
-        let listDiv = document.getElementById('admin-video-list');
-        if (!select || !listDiv) return;
-        
-        let course = select.value;
-        if (!course || !courseData[course]) {
-            listDiv.innerHTML = '';
-            return;
+            currentOwnerPin = p1;
+            alert("New PIN saved successfully!");
+            closeForgotModal();
         }
 
-        let videos = courseData[course].videos || [];
-        let html = '';
-        if (videos.length === 0) {
-            html = '<small style="color: #777;">No videos added yet.</small>';
-        } else {
-            videos.forEach((vid, index) => {
-                html += `
-                    <div class="admin-video-row">
-                        <span><b>${index+1}.</b> ${vid.title}</span>
-                        <button onclick="deleteVideo('${course}', ${index})" style="background: #dc3545; color: white; border: none; padding: 2px 6px; border-radius: 3px; cursor: pointer; font-size: 11px;">Delete</button>
+        // SAVE BOOK
+        function saveBook() {
+            const title = document.getElementById('book-title').value.trim();
+            const price = document.getElementById('book-price').value;
+            let paylink = document.getElementById('book-paylink').value.trim();
+            const content = document.getElementById('book-content').value.trim();
+
+            if(!title || !price || !content) {
+                alert("Please fill all required fields!");
+                return;
+            }
+
+            if(!paylink.startsWith("upi://")) {
+                paylink = `upi://pay?pa=jayashankar9381@ybl&pn=Jayashankar&am=${price}&cu=INR`;
+            }
+
+            const newBook = {
+                id: Date.now(),
+                title,
+                price,
+                paylink,
+                content,
+                readersCount: 0
+            };
+
+            books.push(newBook);
+            localStorage.setItem('published_books', JSON.stringify(books));
+
+            document.getElementById('book-title').value = "";
+            document.getElementById('book-price').value = "";
+            document.getElementById('book-paylink').value = "";
+            document.getElementById('book-content').value = "";
+
+            alert("Book saved successfully!");
+            renderOwnerBooks();
+        }
+
+        // OWNER DELETE BOOK ACTION & READERS TRACKING
+        function deleteBook(bookId) {
+            if(confirm("ఈ పుస్తకాన్ని ఖచ్చితంగా డిలీట్ చేయాలనుకుంటున్నారా?")) {
+                books = books.filter(b => b.id !== bookId);
+                localStorage.setItem('published_books', JSON.stringify(books));
+                renderOwnerBooks();
+                alert("పుస్తకం డిలీట్ చేయబడింది!");
+            }
+        }
+
+        function renderOwnerBooks() {
+            const list = document.getElementById('owner-books-list');
+            list.innerHTML = "";
+            books.forEach(b => {
+                list.innerHTML += `
+                    <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-3">
+                        <div class="flex justify-between font-bold items-center">
+                            <span class="text-indigo-400 text-base">${b.title}</span>
+                            <span class="text-emerald-400">₹${b.price}</span>
+                        </div>
+                        <p class="text-xs text-slate-400 line-clamp-2">${b.content}</p>
+                        <div class="flex justify-between items-center pt-2 border-t border-slate-900">
+                            <span class="text-xs text-slate-400">Total Readers: <b class="text-white font-bold">${b.readersCount} customers</b></span>
+                            <button onclick="deleteBook(${b.id})" class="px-2.5 py-1 bg-red-500/20 hover:bg-red-500/30 text-red-400 text-xs font-bold rounded-lg border border-red-500/30 flex items-center gap-1">
+                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Delete
+                            </button>
+                        </div>
                     </div>
                 `;
             });
+            lucide.createIcons();
         }
-        listDiv.innerHTML = html;
-    }
 
-    function deleteVideo(courseName, index) {
-        if(confirm("Are you sure you want to delete this video?")) {
-            courseData[courseName].videos.splice(index, 1);
-            saveData();
-            renderAdminVideoList();
-            if(currentCourse === courseName) {
-                selectCourse(courseName);
+        // 3. CUSTOMER STORE & 30 DAYS ACCESS VALIDITY CHECK
+        function isBookAccessActive(bookId) {
+            const expiryTimestamp = userPurchases[bookId];
+            if (!expiryTimestamp) return false;
+            return Date.now() < expiryTimestamp; // Active for 30 Days
+        }
+
+        function renderCustomerBooks(filterText = "") {
+            const grid = document.getElementById('customer-books-grid');
+            grid.innerHTML = "";
+            const filtered = books.filter(b => b.title.toLowerCase().includes(filterText.toLowerCase()));
+
+            filtered.forEach(b => {
+                const hasAccess = isBookAccessActive(b.id);
+                grid.innerHTML += `
+                    <div class="bg-slate-900 border border-slate-800 p-5 rounded-3xl space-y-4">
+                        <div class="flex justify-between items-start">
+                            <h4 class="font-bold text-white text-lg">${b.title}</h4>
+                            <span class="text-emerald-400 font-extrabold text-sm">₹${b.price}</span>
+                        </div>
+
+                        ${hasAccess ? `
+                            <div class="bg-emerald-500/10 border border-emerald-500/30 p-3 rounded-2xl text-center">
+                                <span class="text-xs text-emerald-400 font-bold">✅ 30 Days Active Subscription</span>
+                            </div>
+                            <button onclick="openUnlockedBook(${b.id})" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-1 shadow-lg shadow-emerald-600/30">
+                                <i data-lucide="book-open" class="w-4 h-4"></i> Open & Read/Listen
+                            </button>
+                        ` : `
+                            <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 text-center space-y-1">
+                                <i data-lucide="lock" class="w-5 h-5 text-amber-400 mx-auto"></i>
+                                <p class="text-[11px] text-slate-500">Pay once to get 30 Days Full Access</p>
+                            </div>
+                            <button onclick="openPayModal(${b.id})" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-1 shadow-lg shadow-indigo-600/30">
+                                <i data-lucide="credit-card" class="w-4 h-4"></i> Pay Amount (₹${b.price})
+                            </button>
+                        `}
+                    </div>
+                `;
+            });
+            lucide.createIcons();
+        }
+
+        function filterBooks() {
+            renderCustomerBooks(document.getElementById('search-input').value);
+        }
+
+        function openPayModal(bookId) {
+            selectedBookForPay = books.find(b => b.id === bookId);
+            document.getElementById('pay-book-title').innerText = selectedBookForPay.title;
+            document.getElementById('pay-book-price').innerText = `₹${selectedBookForPay.price}`;
+            document.getElementById('payment-modal').classList.remove('hidden');
+        }
+
+        function closePayModal() { document.getElementById('payment-modal').classList.add('hidden'); }
+
+        // AUTOMATIC PHONEPE / UPI OPEN & 30 DAYS ACCESS SET
+        function triggerUPIPayment() {
+            closePayModal();
+            // PhonePe / UPI Dynamic Intent
+            window.location.href = selectedBookForPay.paylink;
+
+            // 30 Days Expiry Timestamp setup (30 days * 24 * 60 * 60 * 1000)
+            const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
+            userPurchases[selectedBookForPay.id] = Date.now() + thirtyDaysMs;
+            localStorage.setItem('user_purchases', JSON.stringify(userPurchases));
+
+            // Increase reader count for owner board
+            selectedBookForPay.readersCount += 1;
+            localStorage.setItem('published_books', JSON.stringify(books));
+
+            setTimeout(() => {
+                alert("Payment Success! 30 Days Access granted.");
+                renderCustomerBooks();
+                openUnlockedBook(selectedBookForPay.id);
+            }, 1000);
+        }
+
+        function openUnlockedBook(bookId) {
+            const book = books.find(b => b.id === bookId);
+            selectedBookForRead = book;
+            currentCharIndex = 0;
+            document.getElementById('reader-title').innerText = book.title;
+            document.getElementById('reader-content-text').innerText = book.content;
+            document.getElementById('reader-modal').classList.remove('hidden');
+        }
+
+        function closeReaderModal() {
+            window.speechSynthesis.cancel();
+            document.getElementById('reader-modal').classList.add('hidden');
+        }
+
+        function setMode(mode) {
+            if(mode === 'read') {
+                document.getElementById('btn-mode-read').className = "flex-1 py-2 bg-indigo-600 text-white rounded-xl text-xs font-bold";
+                document.getElementById('btn-mode-listen').className = "flex-1 py-2 bg-slate-800 text-slate-400 rounded-xl text-xs font-bold";
+                window.speechSynthesis.cancel();
+            } else {
+                document.getElementById('btn-mode-listen').className = "flex-1 py-2 bg-indigo-600 text-white rounded-xl text-xs font-bold";
+                document.getElementById('btn-mode-read').className = "flex-1 py-2 bg-slate-800 text-slate-400 rounded-xl text-xs font-bold";
+                toggleAudio();
             }
-            alert("Video deleted successfully!");
-        }
-    }
-
-    function selectCourse(courseName) {
-        currentCourse = courseName;
-        checkExpiryStatus();
-        let contentDiv = document.getElementById('course-content');
-        let data = courseData[courseName];
-        let now = new Date().getTime();
-
-        let isUnlocked = data.expiry && now < data.expiry;
-
-        if (isUnlocked) {
-            let daysLeft = Math.ceil((data.expiry - now) / (1000 * 60 * 60 * 24));
-            
-            contentDiv.innerHTML = `
-                <div class="unlocked-section" style="text-align: center;">
-                    <h2 style="color: #155724;">${courseName} Course Unlocked Successfully! 🔓</h2>
-                    <p style="font-size: 14px; color: #666;">⏳ మీ కోర్స్ యాక్సెస్ గడువు: మరో <b>${daysLeft} రోజులు</b> ఉంది.</p>
-                    <hr style="border: 0; border-top: 1px solid #c3e6cb; margin: 15px 0;">
-                    <p>యూట్యూబ్ వీడియో నేరుగా చూడటానికి కింద ఉన్న బటన్ క్లిక్ చేయండి:</p>
-                    <button onclick="openDirectYouTubeVideo('${courseName}')" style="background: #ff0000; color: white; border: none; padding: 12px 25px; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: bold;">▶ Watch YouTube Video Now</button>
-                </div>
-            `;
-        } else {
-            contentDiv.innerHTML = `
-                <div class="locked-section">
-                    <h2>${courseName} Course is Locked 🔒</h2>
-                    <p>Please select a payment plan and complete the payment to unlock permanently:</p>
-                    <label><input type="radio" name="plan" value="1500" checked> Rs. 1500/- (2 Months Access + Certificate in 1 Month)</label><br>
-                    <label><input type="radio" name="plan" value="3000"> Rs. 3000/- (2 Months Access + Certificate in 1 Week)</label><br><br>
-                    <button onclick="proceedToPayment()" style="background: #28a745; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 4px; font-size: 16px;">Complete Payment & Unlock</button>
-                </div>
-            `;
-        }
-    }
-
-    function openDirectYouTubeVideo(courseName) {
-        let data = courseData[courseName];
-        if (data && data.videos && data.videos.length > 0) {
-            window.open(data.videos[0].link, '_blank');
-        } else {
-            alert("Owner has not uploaded videos yet for this course.");
-        }
-    }
-
-    function proceedToPayment() {
-        let selectedPlanEl = document.querySelector('input[name="plan"]:checked');
-        if(!selectedPlanEl) return;
-        let selectedPlan = selectedPlanEl.value;
-        let targetPayLink = paymentLinks[selectedPlan];
-
-        if(targetPayLink && targetPayLink.trim() !== '') {
-            window.open(targetPayLink, '_blank');
-        } else {
-            alert("Payment link not configured by owner.");
-            return;
         }
 
-        setTimeout(() => {
-            let confirmPayment = confirm("మీరు పేమెంట్ విజయవంతంగా పూర్తి చేశారా? 'OK' క్లిక్ చేయగానే యూట్యూబ్ వీడియో నేరుగా ఓపెన్ అవుతుంది.");
-            if (confirmPayment) {
-                let daysToAdd = 60; 
-                let expiryTime = new Date().getTime() + (daysToAdd * 24 * 60 * 60 * 1000);
-                
-                courseData[currentCourse].expiry = expiryTime;
-                saveData();
-                
-                alert("Payment Verified! కోర్స్ విజయవంతంగా అన్‌లాక్ చేయబడింది.");
-                
-                // పేమెంట్ కన్ఫర్మ్ అయిన వెంటనే ఆటోమేటిక్‌గా యూట్యూబ్ లింక్ ఓపెన్ అయిపోతుంది
-                let data = courseData[currentCourse];
-                if (data && data.videos && data.videos.length > 0) {
-                    window.open(data.videos[0].link, '_blank');
+        // INSTANT AUDIO & TEXT LANGUAGE SWITCHING
+        function onLanguageOrVoiceChange() {
+            if(window.speechSynthesis.speaking) {
+                speakTextFrom(currentCharIndex);
+            }
+        }
+
+        function toggleAudio() {
+            if ('speechSynthesis' in window) {
+                if (window.speechSynthesis.speaking) {
+                    window.speechSynthesis.cancel();
+                    document.getElementById('audio-status').innerText = "Audio Paused";
+                } else {
+                    speakTextFrom(currentCharIndex);
                 }
-                
-                selectCourse(currentCourse);
+            } else {
+                alert("Speech synthesis not supported in this browser.");
             }
-        }, 1000);
-    }
-
-    function verifyOwnerLogin() {
-        let email = document.getElementById('owner-email-input').value.trim();
-        let password = document.getElementById('owner-password-input').value.trim();
-
-        if (email === "jayashankar9381@gmail.com" && password === "9381198260") {
-            document.getElementById('owner-login-section').classList.add('hidden');
-            document.getElementById('owner-dashboard').classList.remove('hidden');
-        } else {
-            alert('Invalid Owner Gmail or Password! Please check your credentials.');
         }
-    }
 
-    function addNewCourse() {
-        let courseNameInput = document.getElementById('new-course-name');
-        let courseName = courseNameInput ? courseNameInput.value.trim() : '';
-        if(courseName !== '' && !courseData[courseName]) {
-            courseData[courseName] = { videos: [], expiry: null };
-            saveData();
-            renderCourses();
-            courseNameInput.value = '';
-            alert("Course added successfully!");
-        } else {
-            alert("Invalid or already existing course name.");
+        function speakTextFrom(startIndex) {
+            window.speechSynthesis.cancel();
+            const fullText = selectedBookForRead.content;
+            const remainingText = fullText.substring(startIndex);
+            const lang = document.getElementById('audio-lang').value;
+
+            const utterance = new SpeechSynthesisUtterance(remainingText);
+            utterance.lang = lang;
+
+            utterance.onboundary = (event) => {
+                currentCharIndex = startIndex + event.charIndex;
+            };
+
+            utterance.onstart = () => { document.getElementById('audio-status').innerText = "Playing Audio..."; };
+            utterance.onend = () => { document.getElementById('audio-status').innerText = "Audio Finished"; };
+
+            window.speechSynthesis.speak(utterance);
         }
-    }
 
-    function saveYoutubeVideo() {
-        let select = document.getElementById('target-course').value;
-        let templateTitle = document.getElementById('yt-title').value.trim();
-        let link = document.getElementById('yt-link').value.trim();
-        
-        if(templateTitle !== '' && link !== '') {
-            if(!courseData[select].videos) {
-                courseData[select].videos = [];
+        function skipAudio(seconds) {
+            if (!selectedBookForRead) return;
+            const charOffset = seconds * 15; 
+            currentCharIndex = Math.max(0, currentCharIndex + charOffset);
+            
+            if (window.speechSynthesis.speaking) {
+                speakTextFrom(currentCharIndex);
             }
-            courseData[select].videos.push({ title: templateTitle, link: link });
-            saveData();
-            renderAdminVideoList();
-            alert("Video added successfully to " + select + "!");
-            document.getElementById('yt-title').value = '';
-            document.getElementById('yt-link').value = '';
-        } else {
-            alert('Please enter both video title and valid link.');
+            document.getElementById('audio-status').innerText = `${seconds > 0 ? '+' : ''}${seconds}s Skipped`;
         }
-    }
 
-    function savePaymentLinks() {
-        let link1500 = document.getElementById('pay-1500-link').value;
-        let link3000 = document.getElementById('pay-3000-link').value;
-        paymentLinks['1500'] = link1500.trim();
-        paymentLinks['3000'] = link3000.trim();
-        saveData();
-        alert("Payment links updated successfully!");
-    }
+        // PERFECT SHARING SYSTEM (Native Web Share & Link Fallback)
+        function perfectShareBook() {
+            const shareData = {
+                title: selectedBookForRead.title,
+                text: `Check out this E-Book & Audio: ${selectedBookForRead.title}`,
+                url: window.location.href
+            };
 
-    function shareWebsite() {
-        let shareText = encodeURIComponent("Check out this Online Technical Institute portal for technical courses: " + window.location.href);
-        if (navigator.share) {
-            navigator.share({
-                title: 'Online Technical Institute',
-                text: 'Learn technical courses easily!',
-                url: window.location.href,
-            }).catch(() => {});
-        } else {
-            window.open(`https://api.whatsapp.com/send?text=${shareText}`, '_blank');
+            if (navigator.share) {
+                navigator.share(shareData).catch(() => {});
+            } else {
+                navigator.clipboard.writeText(window.location.href);
+                alert("Book share link copied to clipboard!");
+            }
         }
-    }
-</script>
-
+    </script>
 </body>
 </html>

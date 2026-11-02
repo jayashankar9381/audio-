@@ -1,17 +1,23 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="te">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Audio Book Studio & E-Book Store</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .no-select {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        @media print { body { display: none !important; } }
+    </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen font-sans">
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans no-select" oncontextmenu="return false;">
 
-    <!-- Top Navigation Bar -->
+    <!-- Navigation Bar -->
     <nav class="bg-slate-900 border-b border-slate-800 p-4 sticky top-0 z-50">
         <div class="max-w-6xl mx-auto flex justify-between items-center">
             <div class="flex items-center gap-2 cursor-pointer" onclick="showCustomerView()">
@@ -32,148 +38,119 @@
 
     <main class="max-w-5xl mx-auto p-4 md:p-8">
 
-        <!-- ==================== 1. OWNER LOGIN VIEW ==================== -->
-        <section id="owner-login-view" class="hidden max-w-md mx-auto bg-slate-900 p-6 md:p-8 rounded-3xl border border-slate-800 shadow-2xl space-y-6">
+        <!-- 1. OWNER LOGIN VIEW -->
+        <section id="owner-login-view" class="hidden max-w-md mx-auto bg-slate-900 p-6 rounded-3xl border border-slate-800 space-y-6">
             <div class="text-center space-y-2">
                 <h2 class="text-2xl font-bold text-white">Owner Portal Login</h2>
-                <p class="text-xs text-slate-400">Restricted access for store owner only</p>
+                <p class="text-xs text-slate-400">అడ్మిన్ డాష్‌బోర్డ్ లాగిన్ వివరాలు</p>
             </div>
 
             <div class="space-y-4">
                 <div>
                     <label class="block text-xs font-bold text-slate-300 mb-1">Owner Email</label>
-                    <input type="email" id="owner-email" value="jayashankar9381@gmail.com" class="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                    <input type="email" id="owner-email" value="jayashankar9381@gmail.com" class="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm outline-none">
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-300 mb-1">PIN / Password</label>
-                    <input type="password" id="owner-pass" value="9381" class="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                    <input type="password" id="owner-pass" value="9381198260" class="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm outline-none">
                 </div>
-
-                <div class="flex justify-between items-center text-xs">
-                    <button onclick="openForgotModal()" class="text-indigo-400 hover:underline">Forgot Password?</button>
-                    <button onclick="showCustomerView()" class="text-slate-400 hover:underline">Back to Store</button>
-                </div>
-
-                <button onclick="handleOwnerLogin()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 font-bold rounded-xl text-sm shadow-lg shadow-indigo-600/30 transition">
+                <button onclick="handleOwnerLogin()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 font-bold rounded-xl text-sm transition">
                     Login to Dashboard
                 </button>
             </div>
         </section>
 
-        <!-- FORGOT PASSWORD MODAL -->
-        <div id="forgot-modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
-            <div class="bg-slate-900 border border-slate-800 max-w-sm w-full p-6 rounded-3xl space-y-4">
-                <h3 class="text-lg font-bold text-white">Reset Owner Password</h3>
-                <p class="text-xs text-slate-400">OTP sent to <b>jayashankar9381@gmail.com</b> (OTP: <b>938100</b>)</p>
-
-                <input type="text" id="otp-input" placeholder="Enter OTP (938100)" class="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm">
-                <input type="password" id="new-pin-1" placeholder="New Password / PIN" class="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm">
-                <input type="password" id="new-pin-2" placeholder="Confirm Password / PIN" class="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm">
-
-                <div class="flex gap-2">
-                    <button onclick="closeForgotModal()" class="w-1/2 py-2.5 bg-slate-800 text-slate-300 rounded-xl text-xs font-bold">Cancel</button>
-                    <button onclick="resetPassword()" class="w-1/2 py-2.5 bg-indigo-600 text-white rounded-xl text-xs font-bold">Confirm PIN</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- ==================== 2. OWNER DASHBOARD VIEW ==================== -->
+        <!-- 2. OWNER DASHBOARD VIEW -->
         <section id="owner-dashboard-view" class="hidden space-y-8">
             <div class="flex justify-between items-center border-b border-slate-800 pb-4">
                 <div>
                     <h2 class="text-2xl font-bold text-white">Owner Management Board</h2>
-                    <p class="text-xs text-slate-400">Upload, delete books and track reader counts</p>
+                    <p class="text-xs text-slate-400">పుస్తకాలు అప్‌లోడ్ చేయండి, సవరించండి లేదా డిలీట్ చేయండి</p>
                 </div>
-                <button onclick="showCustomerView()" class="px-3 py-1.5 bg-red-500/20 text-red-400 text-xs font-bold rounded-lg border border-red-500/30">Logout / Exit</button>
+                <button onclick="showCustomerView()" class="px-3 py-1.5 bg-red-500/20 text-red-400 text-xs font-bold rounded-lg border border-red-500/30">Exit Board</button>
             </div>
 
-            <!-- Upload Separate Book Form -->
             <div class="bg-slate-900 p-6 rounded-3xl border border-slate-800 space-y-4">
-                <h3 class="text-lg font-bold text-indigo-400 flex items-center gap-2">
-                    <i data-lucide="plus-circle" class="w-5 h-5"></i> Publish New Separate Book
+                <h3 id="form-header-title" class="text-lg font-bold text-indigo-400 flex items-center gap-2">
+                    <i data-lucide="plus-circle" class="w-5 h-5"></i> కొత్త పుస్తకం అప్‌లోడ్ చేయండి (Publish Book)
                 </h3>
+                <input type="hidden" id="editing-book-id" value="">
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-bold text-slate-300 mb-1">Book Title (Unique)</label>
-                        <input type="text" id="book-title" placeholder="e.g. Tenali Raman Stories" class="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm">
+                        <label class="block text-xs font-bold text-slate-300 mb-1">Book Title (పుస్తకం పేరు)</label>
+                        <input type="text" id="book-title" placeholder="Book Title" class="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-300 mb-1">Price (₹)</label>
-                        <input type="number" id="book-price" placeholder="299" class="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm">
+                        <input type="number" id="book-price" placeholder="199" class="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 mb-1">Cover Image URL (ఫోటో లింక్)</label>
+                        <input type="url" id="book-image" placeholder="https://..." class="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 mb-1">Payment UPI Link</label>
+                        <input type="text" id="book-paylink" placeholder="upi://pay?pa=..." class="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm">
                     </div>
                 </div>
 
                 <div>
-                    <label class="block text-xs font-bold text-slate-300 mb-1">Payment Gateway / PhonePe UPI Link / ID</label>
-                    <input type="text" id="book-paylink" placeholder="upi://pay?pa=owner@upi&pn=Owner" class="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm">
+                    <label class="block text-xs font-bold text-slate-300 mb-1">Book Text Content (పుస్తక సారాంశం)</label>
+                    <textarea id="book-content" rows="4" placeholder="Book Content..." class="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm"></textarea>
                 </div>
 
-                <div>
-                    <label class="block text-xs font-bold text-slate-300 mb-1">Book Content / Text</label>
-                    <textarea id="book-content" rows="5" placeholder="Enter book contents here..." class="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm"></textarea>
+                <div class="flex gap-3">
+                    <button onclick="saveBook()" class="flex-1 py-3.5 bg-indigo-600 hover:bg-indigo-700 font-bold rounded-xl text-sm transition">
+                        <span id="save-btn-label">Save & Publish Book</span>
+                    </button>
+                    <button id="cancel-edit-btn" onclick="resetForm()" class="hidden py-3.5 px-6 bg-slate-800 text-slate-300 font-bold rounded-xl text-sm">
+                        Cancel Edit
+                    </button>
                 </div>
-
-                <button onclick="saveBook()" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 font-bold rounded-xl text-sm shadow-lg shadow-indigo-600/30 transition flex items-center justify-center gap-2">
-                    <i data-lucide="save" class="w-4 h-4"></i> Save Separate Book
-                </button>
             </div>
 
-            <!-- Published Books Analytics & Delete Action -->
             <div class="space-y-4">
-                <h3 class="text-lg font-bold text-white">Published Books Management</h3>
-                <div id="owner-books-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- Dynamic Books with Delete Button -->
-                </div>
+                <h3 class="text-lg font-bold text-white">అప్‌లోడ్ చేసిన పుస్తకాలు & ఎడిట్/డిలీట్ మేనేజర్</h3>
+                <div id="owner-books-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
             </div>
         </section>
 
-        <!-- ==================== 3. CUSTOMER STORE VIEW ==================== -->
+        <!-- 3. CUSTOMER STORE VIEW -->
         <section id="customer-store-view" class="space-y-6">
-            <!-- Language Selector Bar -->
-            <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 flex flex-wrap items-center justify-between gap-4">
+            <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 flex justify-between items-center">
                 <div class="flex items-center gap-2">
-                    <i data-lucide="globe" class="text-indigo-400 w-5 h-5"></i>
-                    <span class="text-xs font-bold text-slate-300">Interface Language:</span>
-                    <select id="ui-lang" onchange="changeInterfaceLanguage()" class="bg-slate-950 border border-slate-700 p-2 rounded-xl text-xs text-indigo-300 font-bold">
-                        <option value="en" selected>English (Default)</option>
-                        <option value="te">తెలుగు (Telugu)</option>
-                        <option value="hi">हिंदी (Hindi)</option>
-                        <option value="ta">தமிழ் (Tamil)</option>
-                        <option value="kn">ಕನ್ನಡ (Kannada)</option>
-                        <option value="ml">മലയാളം (Malayalam)</option>
-                    </select>
+                    <i data-lucide="store" class="text-indigo-400 w-5 h-5"></i>
+                    <span class="text-sm font-bold text-slate-200">E-Book & Audio Store</span>
                 </div>
-
                 <button onclick="googleLogin()" class="px-4 py-2 bg-slate-800 border border-slate-700 hover:bg-slate-700 rounded-xl text-xs font-bold flex items-center gap-2">
-                    <i data-lucide="user" class="w-4 h-4 text-emerald-400"></i> <span id="user-status">Sign in with Google</span>
+                    <i data-lucide="user" class="w-4 h-4 text-emerald-400"></i> <span id="user-status">Google తో లాగిన్ అవ్వండి</span>
                 </button>
             </div>
 
-            <!-- Search Bar -->
             <div class="relative">
                 <i data-lucide="search" class="absolute left-4 top-3.5 text-slate-500 w-5 h-5"></i>
                 <input type="text" id="search-input" onkeyup="filterBooks()" placeholder="Search books by title..." class="w-full pl-12 pr-4 py-3 bg-slate-900 border border-slate-800 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
             </div>
 
-            <!-- Customer Store Grid -->
-            <div id="customer-books-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Books Rendered Here -->
-            </div>
+            <div id="customer-books-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
         </section>
 
-        <!-- PAYMENT MODAL FOR CUSTOMER WITH PHONEPE / UPI AUTO-OPEN -->
+        <!-- PAYMENT MODAL -->
         <div id="payment-modal" class="hidden fixed inset-0 bg-black/85 flex items-center justify-center p-4 z-50">
             <div class="bg-slate-900 border border-slate-800 max-w-sm w-full p-6 rounded-3xl space-y-4 text-center">
                 <i data-lucide="lock" class="w-12 h-12 text-amber-400 mx-auto"></i>
                 <h3 id="pay-book-title" class="text-lg font-bold text-white"></h3>
-                <p class="text-xs text-slate-400">Pay amount to get <b>30 Days Full Access</b> (PhonePe / Google Pay / UPI).</p>
+                <p class="text-xs text-slate-400">అమౌంట్ పే చేసిన తర్వాత మాత్రమే <b>30 రోజుల పాటు</b> కంటెంట్ ఓపెన్ అవుతుంది.</p>
 
                 <div class="text-3xl font-extrabold text-emerald-400" id="pay-book-price"></div>
 
                 <div class="flex flex-col gap-2 pt-2">
-                    <button onclick="triggerUPIPayment()" class="py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-2">
-                        <i data-lucide="smartphone" class="w-4 h-4"></i> Pay via PhonePe / UPI (30 Days)
+                    <button onclick="triggerUPIPayment()" class="py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/30">
+                        <i data-lucide="smartphone" class="w-4 h-4"></i> Pay via PhonePe / UPI (30 Days Access)
                     </button>
                     <button onclick="closePayModal()" class="py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold border border-slate-700">
                         Cancel
@@ -182,49 +159,23 @@
             </div>
         </div>
 
-        <!-- UNLOCKED BOOK READER MODAL -->
+        <!-- UNLOCKED READER MODAL -->
         <div id="reader-modal" class="hidden fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50 overflow-y-auto">
             <div class="bg-slate-900 border border-slate-800 max-w-2xl w-full p-6 rounded-3xl space-y-6 my-8">
-                <!-- Header -->
                 <div class="flex justify-between items-start border-b border-slate-800 pb-3">
                     <div>
                         <h3 id="reader-title" class="text-xl font-bold text-indigo-400"></h3>
-                        <span id="validity-badge" class="text-[10px] bg-emerald-500/20 text-emerald-400 px-2.5 py-0.5 rounded-full font-bold">30 Days Active Access</span>
+                        <span class="text-[10px] bg-emerald-500/20 text-emerald-400 px-2.5 py-0.5 rounded-full font-bold">✅ 30 Days Access Active</span>
                     </div>
                     <button onclick="closeReaderModal()" class="p-2 bg-slate-800 hover:bg-slate-700 rounded-xl">
                         <i data-lucide="x" class="w-4 h-4"></i>
                     </button>
                 </div>
 
-                <!-- Voice & Instant Language Switcher -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-950 p-4 rounded-2xl border border-slate-800">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-400 mb-1">Audio Voice & Language:</label>
-                        <select id="audio-lang" onchange="onLanguageOrVoiceChange()" class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-indigo-300 font-bold">
-                            <option value="te-IN" selected>తెలుగు (Telugu)</option>
-                            <option value="hi-IN">हिंदी (Hindi)</option>
-                            <option value="en-US">English (US)</option>
-                            <option value="ta-IN">தமிழ் (Tamil)</option>
-                            <option value="kn-IN">ಕನ್ನಡ (Kannada)</option>
-                            <option value="ml-IN">മലയാളം (Malayalam)</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold text-slate-400 mb-1">Customer Mode:</label>
-                        <div class="flex gap-2">
-                            <button id="btn-mode-read" onclick="setMode('read')" class="flex-1 py-2 bg-indigo-600 text-white rounded-xl text-xs font-bold">📖 Reading</button>
-                            <button id="btn-mode-listen" onclick="setMode('listen')" class="flex-1 py-2 bg-slate-800 text-slate-400 rounded-xl text-xs font-bold">🎧 Listening</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Text Scroll Box -->
                 <div class="bg-slate-950 p-5 rounded-2xl border border-slate-800 max-h-60 overflow-y-auto">
-                    <p id="reader-content-text" class="text-sm text-slate-300 leading-relaxed whitespace-pre-line"></p>
+                    <p id="reader-content-text" class="text-sm text-slate-300 leading-relaxed whitespace-pre-line no-select"></p>
                 </div>
 
-                <!-- Controls with Skipping and Native Share -->
                 <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-3">
                     <div class="flex items-center justify-center gap-4">
                         <button onclick="skipAudio(-10)" class="p-3 bg-slate-800 hover:bg-slate-700 text-indigo-300 rounded-xl text-xs font-bold flex items-center gap-1">
@@ -242,7 +193,7 @@
 
                     <div class="flex justify-between items-center pt-2 border-t border-slate-900">
                         <span id="audio-status" class="text-xs text-indigo-400 font-semibold">Audio Player Ready</span>
-                        <button onclick="perfectShareBook()" class="px-3.5 py-2 bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 rounded-xl text-xs font-bold flex items-center gap-1.5 transition">
+                        <button onclick="shareBook()" class="px-3.5 py-2 bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 rounded-xl text-xs font-bold flex items-center gap-1.5">
                             <i data-lucide="share-2" class="w-4 h-4"></i> Share Book
                         </button>
                     </div>
@@ -253,21 +204,20 @@
     </main>
 
     <script>
-        let currentOwnerPin = "9381";
+        let currentOwnerPin = "9381198260";
         let books = JSON.parse(localStorage.getItem('published_books')) || [
             {
                 id: 1,
-                title: "AI & Future Stories",
+                title: "AI భవిష్యత్తు కథలు 2026",
                 price: 199,
+                image: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=500&auto=format&fit=crop",
                 paylink: "upi://pay?pa=jayashankar9381@ybl&pn=Jayashankar&am=199&cu=INR",
-                content: "ఇది ఒక అద్భుతమైన AI ఆడియో పుస్తకం. మీరు దీనిని నేరుగా చదవవచ్చు మరియు ఏ భారతీయ భాషలోనైనా వెంటనే ఆటోమేటిక్‌గా వినవచ్చు.",
-                readersCount: 11
+                content: "ఇది AI టెక్నాలజీ భవిష్యత్తు గురించిన పుస్తకం. పేమెంట్ చేసిన తర్వాత మాత్రమే 30 రోజుల యాక్సెస్‌తో కంటెంట్ అన్‌లాక్ అవుతుంది.",
+                readersCount: 18
             }
         ];
 
-        // 30 Days Expiry Access Manager Storage
         let userPurchases = JSON.parse(localStorage.getItem('user_purchases')) || {};
-
         let selectedBookForPay = null;
         let selectedBookForRead = null;
         let currentCharIndex = 0;
@@ -302,35 +252,20 @@
                 document.getElementById('owner-dashboard-view').classList.remove('hidden');
                 renderOwnerBooks();
             } else {
-                alert("Invalid Credentials!");
+                alert("తప్పు వివరాలు! దయచేసి మళ్ళీ ప్రయత్నించండి.");
             }
         }
 
-        function openForgotModal() { document.getElementById('forgot-modal').classList.remove('hidden'); }
-        function closeForgotModal() { document.getElementById('forgot-modal').classList.add('hidden'); }
-
-        function resetPassword() {
-            const otp = document.getElementById('otp-input').value;
-            const p1 = document.getElementById('new-pin-1').value;
-            const p2 = document.getElementById('new-pin-2').value;
-
-            if(otp !== "938100") { alert("Invalid OTP!"); return; }
-            if(!p1 || p1 !== p2) { alert("PINs do not match!"); return; }
-
-            currentOwnerPin = p1;
-            alert("New PIN saved successfully!");
-            closeForgotModal();
-        }
-
-        // SAVE BOOK
         function saveBook() {
+            const editingId = document.getElementById('editing-book-id').value;
             const title = document.getElementById('book-title').value.trim();
             const price = document.getElementById('book-price').value;
+            const image = document.getElementById('book-image').value.trim();
             let paylink = document.getElementById('book-paylink').value.trim();
             const content = document.getElementById('book-content').value.trim();
 
             if(!title || !price || !content) {
-                alert("Please fill all required fields!");
+                alert("దయచేసి టైటిల్, ధర మరియు కంటెంట్‌ని పూర్తి చేయండి!");
                 return;
             }
 
@@ -338,34 +273,70 @@
                 paylink = `upi://pay?pa=jayashankar9381@ybl&pn=Jayashankar&am=${price}&cu=INR`;
             }
 
-            const newBook = {
-                id: Date.now(),
-                title,
-                price,
-                paylink,
-                content,
-                readersCount: 0
-            };
+            if(editingId) {
+                const bIndex = books.findIndex(b => b.id == editingId);
+                if(bIndex !== -1) {
+                    books[bIndex].title = title;
+                    books[bIndex].price = price;
+                    books[bIndex].image = image || books[bIndex].image;
+                    books[bIndex].paylink = paylink;
+                    books[bIndex].content = content;
+                }
+                alert("పుస్తకం అప్‌డేట్ చేయబడింది!");
+            } else {
+                const newBook = {
+                    id: Date.now(),
+                    title,
+                    price,
+                    image: image || "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=500&auto=format&fit=crop",
+                    paylink,
+                    content,
+                    readersCount: 0
+                };
+                books.push(newBook);
+                alert("కొత్త పుస్తకం సేవ్ చేయబడింది!");
+            }
 
-            books.push(newBook);
             localStorage.setItem('published_books', JSON.stringify(books));
-
-            document.getElementById('book-title').value = "";
-            document.getElementById('book-price').value = "";
-            document.getElementById('book-paylink').value = "";
-            document.getElementById('book-content').value = "";
-
-            alert("Book saved successfully!");
+            resetForm();
             renderOwnerBooks();
         }
 
-        // OWNER DELETE BOOK ACTION & READERS TRACKING
+        function editBook(bookId) {
+            const b = books.find(book => book.id === bookId);
+            if(!b) return;
+
+            document.getElementById('editing-book-id').value = b.id;
+            document.getElementById('book-title').value = b.title;
+            document.getElementById('book-price').value = b.price;
+            document.getElementById('book-image').value = b.image;
+            document.getElementById('book-paylink').value = b.paylink;
+            document.getElementById('book-content').value = b.content;
+
+            document.getElementById('form-header-title').innerText = "✏️ పుస్తకాన్ని మార్చండి (Edit Book)";
+            document.getElementById('save-btn-label').innerText = "Update Book";
+            document.getElementById('cancel-edit-btn').classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function resetForm() {
+            document.getElementById('editing-book-id').value = "";
+            document.getElementById('book-title').value = "";
+            document.getElementById('book-price').value = "";
+            document.getElementById('book-image').value = "";
+            document.getElementById('book-paylink').value = "";
+            document.getElementById('book-content').value = "";
+
+            document.getElementById('form-header-title').innerText = "Publish New Separate Book";
+            document.getElementById('save-btn-label').innerText = "Save & Publish Book";
+            document.getElementById('cancel-edit-btn').classList.add('hidden');
+        }
+
         function deleteBook(bookId) {
             if(confirm("ఈ పుస్తకాన్ని ఖచ్చితంగా డిలీట్ చేయాలనుకుంటున్నారా?")) {
                 books = books.filter(b => b.id !== bookId);
                 localStorage.setItem('published_books', JSON.stringify(books));
                 renderOwnerBooks();
-                alert("పుస్తకం డిలీట్ చేయబడింది!");
             }
         }
 
@@ -374,17 +345,21 @@
             list.innerHTML = "";
             books.forEach(b => {
                 list.innerHTML += `
-                    <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-3">
-                        <div class="flex justify-between font-bold items-center">
-                            <span class="text-indigo-400 text-base">${b.title}</span>
-                            <span class="text-emerald-400">₹${b.price}</span>
-                        </div>
-                        <p class="text-xs text-slate-400 line-clamp-2">${b.content}</p>
-                        <div class="flex justify-between items-center pt-2 border-t border-slate-900">
-                            <span class="text-xs text-slate-400">Total Readers: <b class="text-white font-bold">${b.readersCount} customers</b></span>
-                            <button onclick="deleteBook(${b.id})" class="px-2.5 py-1 bg-red-500/20 hover:bg-red-500/30 text-red-400 text-xs font-bold rounded-lg border border-red-500/30 flex items-center gap-1">
-                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Delete
-                            </button>
+                    <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-3 flex gap-3 items-center">
+                        <img src="${b.image}" class="w-16 h-20 object-cover rounded-lg border border-slate-800">
+                        <div class="flex-1 space-y-1">
+                            <div class="flex justify-between font-bold">
+                                <span class="text-indigo-400 text-sm">${b.title}</span>
+                                <span class="text-emerald-400 text-sm">₹${b.price}</span>
+                            </div>
+                            <p class="text-xs text-slate-400 line-clamp-1">${b.content}</p>
+                            <div class="flex justify-between items-center pt-2 border-t border-slate-900 text-xs">
+                                <span class="text-slate-400">చదివినవారు: <b class="text-white">${b.readersCount} మంది</b></span>
+                                <div class="flex gap-2">
+                                    <button onclick="editBook(${b.id})" class="px-2 py-1 bg-indigo-500/20 text-indigo-300 text-[10px] font-bold rounded border border-indigo-500/30">Edit</button>
+                                    <button onclick="deleteBook(${b.id})" class="px-2 py-1 bg-red-500/20 text-red-400 text-[10px] font-bold rounded border border-red-500/30">Delete</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -392,11 +367,10 @@
             lucide.createIcons();
         }
 
-        // 3. CUSTOMER STORE & 30 DAYS ACCESS VALIDITY CHECK
+        // STRICT 30-DAY PAYWALL ACCESS CHECK
         function isBookAccessActive(bookId) {
-            const expiryTimestamp = userPurchases[bookId];
-            if (!expiryTimestamp) return false;
-            return Date.now() < expiryTimestamp; // Active for 30 Days
+            const expiry = userPurchases[bookId];
+            return expiry && Date.now() < expiry;
         }
 
         function renderCustomerBooks(filterText = "") {
@@ -407,26 +381,22 @@
             filtered.forEach(b => {
                 const hasAccess = isBookAccessActive(b.id);
                 grid.innerHTML += `
-                    <div class="bg-slate-900 border border-slate-800 p-5 rounded-3xl space-y-4">
-                        <div class="flex justify-between items-start">
-                            <h4 class="font-bold text-white text-lg">${b.title}</h4>
-                            <span class="text-emerald-400 font-extrabold text-sm">₹${b.price}</span>
+                    <div class="bg-slate-900 border border-slate-800 p-4 rounded-3xl space-y-3 flex flex-col justify-between">
+                        <div class="space-y-3">
+                            <img src="${b.image}" class="w-full h-44 object-cover rounded-2xl border border-slate-800">
+                            <div class="flex justify-between items-start">
+                                <h4 class="font-bold text-white text-base">${b.title}</h4>
+                                <span class="text-emerald-400 font-extrabold text-sm">₹${b.price}</span>
+                            </div>
                         </div>
 
                         ${hasAccess ? `
-                            <div class="bg-emerald-500/10 border border-emerald-500/30 p-3 rounded-2xl text-center">
-                                <span class="text-xs text-emerald-400 font-bold">✅ 30 Days Active Subscription</span>
-                            </div>
                             <button onclick="openUnlockedBook(${b.id})" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-1 shadow-lg shadow-emerald-600/30">
-                                <i data-lucide="book-open" class="w-4 h-4"></i> Open & Read/Listen
+                                <i data-lucide="book-open" class="w-4 h-4"></i> చదవండి / వినండి (30 Days Active)
                             </button>
                         ` : `
-                            <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 text-center space-y-1">
-                                <i data-lucide="lock" class="w-5 h-5 text-amber-400 mx-auto"></i>
-                                <p class="text-[11px] text-slate-500">Pay once to get 30 Days Full Access</p>
-                            </div>
                             <button onclick="openPayModal(${b.id})" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-1 shadow-lg shadow-indigo-600/30">
-                                <i data-lucide="credit-card" class="w-4 h-4"></i> Pay Amount (₹${b.price})
+                                <i data-lucide="lock" class="w-4 h-4"></i> కొనుగోలు చేయండి (₹${b.price})
                             </button>
                         `}
                     </div>
@@ -435,9 +405,7 @@
             lucide.createIcons();
         }
 
-        function filterBooks() {
-            renderCustomerBooks(document.getElementById('search-input').value);
-        }
+        function filterBooks() { renderCustomerBooks(document.getElementById('search-input').value); }
 
         function openPayModal(bookId) {
             selectedBookForPay = books.find(b => b.id === bookId);
@@ -448,29 +416,32 @@
 
         function closePayModal() { document.getElementById('payment-modal').classList.add('hidden'); }
 
-        // AUTOMATIC PHONEPE / UPI OPEN & 30 DAYS ACCESS SET
         function triggerUPIPayment() {
             closePayModal();
-            // PhonePe / UPI Dynamic Intent
             window.location.href = selectedBookForPay.paylink;
 
-            // 30 Days Expiry Timestamp setup (30 days * 24 * 60 * 60 * 1000)
             const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
             userPurchases[selectedBookForPay.id] = Date.now() + thirtyDaysMs;
             localStorage.setItem('user_purchases', JSON.stringify(userPurchases));
 
-            // Increase reader count for owner board
             selectedBookForPay.readersCount += 1;
             localStorage.setItem('published_books', JSON.stringify(books));
 
             setTimeout(() => {
-                alert("Payment Success! 30 Days Access granted.");
+                alert("పేమెంట్ ప్రాసెస్ చేయబడింది! 30 రోజుల యాక్సెస్ లభించింది.");
                 renderCustomerBooks();
                 openUnlockedBook(selectedBookForPay.id);
             }, 1000);
         }
 
         function openUnlockedBook(bookId) {
+            // STRICT CHECK BEFORE OPENING
+            if (!isBookAccessActive(bookId)) {
+                alert("ఈ పుస్తకం చదవడానికి ముందుగా పేమెంట్ చేయాలి!");
+                openPayModal(bookId);
+                return;
+            }
+
             const book = books.find(b => b.id === bookId);
             selectedBookForRead = book;
             currentCharIndex = 0;
@@ -484,25 +455,6 @@
             document.getElementById('reader-modal').classList.add('hidden');
         }
 
-        function setMode(mode) {
-            if(mode === 'read') {
-                document.getElementById('btn-mode-read').className = "flex-1 py-2 bg-indigo-600 text-white rounded-xl text-xs font-bold";
-                document.getElementById('btn-mode-listen').className = "flex-1 py-2 bg-slate-800 text-slate-400 rounded-xl text-xs font-bold";
-                window.speechSynthesis.cancel();
-            } else {
-                document.getElementById('btn-mode-listen').className = "flex-1 py-2 bg-indigo-600 text-white rounded-xl text-xs font-bold";
-                document.getElementById('btn-mode-read').className = "flex-1 py-2 bg-slate-800 text-slate-400 rounded-xl text-xs font-bold";
-                toggleAudio();
-            }
-        }
-
-        // INSTANT AUDIO & TEXT LANGUAGE SWITCHING
-        function onLanguageOrVoiceChange() {
-            if(window.speechSynthesis.speaking) {
-                speakTextFrom(currentCharIndex);
-            }
-        }
-
         function toggleAudio() {
             if ('speechSynthesis' in window) {
                 if (window.speechSynthesis.speaking) {
@@ -511,8 +463,6 @@
                 } else {
                     speakTextFrom(currentCharIndex);
                 }
-            } else {
-                alert("Speech synthesis not supported in this browser.");
             }
         }
 
@@ -520,15 +470,11 @@
             window.speechSynthesis.cancel();
             const fullText = selectedBookForRead.content;
             const remainingText = fullText.substring(startIndex);
-            const lang = document.getElementById('audio-lang').value;
 
             const utterance = new SpeechSynthesisUtterance(remainingText);
-            utterance.lang = lang;
+            utterance.lang = "te-IN"; // Default Telugu Voice
 
-            utterance.onboundary = (event) => {
-                currentCharIndex = startIndex + event.charIndex;
-            };
-
+            utterance.onboundary = (event) => { currentCharIndex = startIndex + event.charIndex; };
             utterance.onstart = () => { document.getElementById('audio-status').innerText = "Playing Audio..."; };
             utterance.onend = () => { document.getElementById('audio-status').innerText = "Audio Finished"; };
 
@@ -537,29 +483,24 @@
 
         function skipAudio(seconds) {
             if (!selectedBookForRead) return;
-            const charOffset = seconds * 15; 
-            currentCharIndex = Math.max(0, currentCharIndex + charOffset);
-            
-            if (window.speechSynthesis.speaking) {
-                speakTextFrom(currentCharIndex);
-            }
+            currentCharIndex = Math.max(0, currentCharIndex + (seconds * 15));
+            if (window.speechSynthesis.speaking) speakTextFrom(currentCharIndex);
             document.getElementById('audio-status').innerText = `${seconds > 0 ? '+' : ''}${seconds}s Skipped`;
         }
 
-        // PERFECT SHARING SYSTEM (Native Web Share & Link Fallback)
-        function perfectShareBook() {
-            const shareData = {
-                title: selectedBookForRead.title,
-                text: `Check out this E-Book & Audio: ${selectedBookForRead.title}`,
-                url: window.location.href
-            };
-
+        function shareBook() {
+            const shareData = { title: selectedBookForRead.title, url: window.location.href };
             if (navigator.share) {
-                navigator.share(shareData).catch(() => {});
+                navigator.share(shareData);
             } else {
                 navigator.clipboard.writeText(window.location.href);
-                alert("Book share link copied to clipboard!");
+                alert("లింక్ కాపీ చేయబడింది!");
             }
+        }
+
+        function googleLogin() {
+            document.getElementById('user-status').innerText = "Google User (Logged In)";
+            alert("Google లాగిన్ పూర్తయింది!");
         }
     </script>
 </body>

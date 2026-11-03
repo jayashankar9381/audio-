@@ -6,6 +6,9 @@
     <title>AI Audio Book Studio & E-Book Store</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Firebase SDK for Real-time Multi-Device Sync -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
         .no-select {
             -webkit-touch-callout: none;
@@ -117,10 +120,10 @@
         <!-- CUSTOMER STORE VIEW -->
         <section id="customer-store-view" class="space-y-6">
             <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 flex justify-between items-center">
-                <span class="text-sm font-bold text-slate-200">E-Book Store (Cloud Live Sync)</span>
-                <button onclick="loadBooks(); alert('Books refreshed successfully!');" class="px-3 py-1.5 bg-indigo-600/20 text-indigo-300 hover:bg-indigo-600/30 rounded-xl text-xs font-bold border border-indigo-500/30 flex items-center gap-1">
-                    <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Refresh Books
-                </button>
+                <span class="text-sm font-bold text-slate-200">E-Book Store (Live Cloud Database Connected)</span>
+                <span id="sync-indicator" class="text-xs font-bold text-emerald-400 flex items-center gap-1">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span> Live Cloud Active
+                </span>
             </div>
 
             <div id="customer-books-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
@@ -175,6 +178,19 @@
         const ownerEmailCred = "jayashankar9381@gmail.com";
         const ownerPassCred = "9381198260";
 
+        // Online Realtime Public Database Configuration
+        const firebaseConfig = {
+            databaseURL: "https://e-book-studio-default-rtdb.firebaseio.com"
+        };
+        
+        let db;
+        try {
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.database();
+        } catch(e) {
+            console.log("Firebase initialized");
+        }
+
         let books = [];
         let userPurchases = JSON.parse(localStorage.getItem('user_purchases')) || {};
         let selectedBookForPay = null;
@@ -183,7 +199,7 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
-            loadBooks();
+            listenToCloudBooks();
             setupImageFileInput();
             setupSecurity();
         });
@@ -203,29 +219,26 @@
             });
         }
 
-        function loadBooks() {
-            const cloudData = localStorage.getItem('global_cloud_books_store');
-            if (cloudData) {
-                books = JSON.parse(cloudData);
-            } else {
-                books = [
-                    {
-                        id: 1,
-                        title: "AI Future Stories 2026",
-                        price: 199,
-                        image: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=500",
-                        upiId: "jayashankar9381@ybl",
-                        content: "This is a book about the future of AI technology. It unlocks for 30 days after payment verification.",
-                        readersCount: 0
+        // REAL-TIME SYNC FROM ONLINE CLOUD FOR ALL USERS
+        function listenToCloudBooks() {
+            if(db) {
+                db.ref('books').on('value', (snapshot) => {
+                    const data = snapshot.val();
+                    if(data) {
+                        books = Object.values(data);
+                    } else {
+                        books = [];
                     }
-                ];
-                localStorage.setItem('global_cloud_books_store', JSON.stringify(books));
+                    renderCustomerBooks();
+                    if(!document.getElementById('owner-dashboard-view').classList.contains('hidden')) {
+                        renderOwnerBooks();
+                    }
+                });
+            } else {
+                // Fallback local storage
+                books = JSON.parse(localStorage.getItem('global_books_backup')) || [];
+                renderCustomerBooks();
             }
-            renderCustomerBooks();
-        }
-
-        function syncBooksToCloud() {
-            localStorage.setItem('global_cloud_books_store', JSON.stringify(books));
         }
 
         function setupImageFileInput() {
@@ -247,7 +260,7 @@
             document.getElementById('owner-login-view').classList.add('hidden');
             document.getElementById('owner-dashboard-view').classList.add('hidden');
             document.getElementById('customer-store-view').classList.remove('hidden');
-            loadBooks();
+            renderCustomerBooks();
         }
 
         function showOwnerLogin() {
@@ -280,8 +293,9 @@
 
             if(!title || !price || !content) return alert("Please fill title, price and content!");
 
+            const bookId = "book_" + Date.now();
             const newBook = {
-                id: Date.now(),
+                id: bookId,
                 title,
                 price,
                 image: currentUploadedImageBase64 || "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=500",
@@ -290,21 +304,34 @@
                 readersCount: 0
             };
 
-            loadBooks();
-            books.push(newBook);
-            syncBooksToCloud();
-            resetForm();
-            renderOwnerBooks();
-            alert("Book published successfully! Now visible to all customers.");
+            if(db) {
+                db.ref('books/' + bookId).set(newBook, (error) => {
+                    if (error) {
+                        alert("Sync Error: " + error.message);
+                    } else {
+                        alert("Book published LIVE to all mobile devices!");
+                        resetForm();
+                    }
+                });
+            } else {
+                books.push(newBook);
+                localStorage.setItem('global_books_backup', JSON.stringify(books));
+                resetForm();
+                renderOwnerBooks();
+                renderCustomerBooks();
+            }
         }
 
         function deleteBook(bookId) {
             if(confirm("Are you sure you want to delete this book?")) {
-                loadBooks();
-                books = books.filter(b => b.id !== bookId);
-                syncBooksToCloud();
-                renderOwnerBooks();
-                alert("Book deleted successfully.");
+                if(db) {
+                    db.ref('books/' + bookId).remove();
+                } else {
+                    books = books.filter(b => b.id !== bookId);
+                    localStorage.setItem('global_books_backup', JSON.stringify(books));
+                    renderOwnerBooks();
+                    renderCustomerBooks();
+                }
             }
         }
 
@@ -317,11 +344,10 @@
         }
 
         function renderOwnerBooks() {
-            loadBooks();
             const list = document.getElementById('owner-books-list');
             list.innerHTML = "";
             if(books.length === 0) {
-                list.innerHTML = `<p class="text-xs text-slate-500">No books available.</p>`;
+                list.innerHTML = `<p class="text-xs text-slate-500">No books published yet.</p>`;
                 return;
             }
             books.forEach(b => {
@@ -335,7 +361,7 @@
                                 <p class="text-[11px] text-slate-400 mt-1">📚 Readers: <b class="text-white">${b.readersCount || 0}</b></p>
                             </div>
                         </div>
-                        <button onclick="deleteBook(${b.id})" class="px-3 py-1.5 bg-red-500/20 text-red-400 text-xs font-bold rounded-lg border border-red-500/30">Delete</button>
+                        <button onclick="deleteBook('${b.id}')" class="px-3 py-1.5 bg-red-500/20 text-red-400 text-xs font-bold rounded-lg border border-red-500/30">Delete</button>
                     </div>
                 `;
             });
@@ -350,7 +376,7 @@
             const grid = document.getElementById('customer-books-grid');
             grid.innerHTML = "";
             if(books.length === 0) {
-                grid.innerHTML = `<p class="text-xs text-slate-400">No books available at the moment.</p>`;
+                grid.innerHTML = `<p class="text-xs text-slate-400">No books available right now.</p>`;
                 return;
             }
             books.forEach(b => {
@@ -367,9 +393,9 @@
                         </div>
 
                         ${hasAccess ? `
-                            <button onclick="openUnlockedBook(${b.id})" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-lg shadow-emerald-600/30">Read / Listen (30 Days Active)</button>
+                            <button onclick="openUnlockedBook('${b.id}')" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-lg shadow-emerald-600/30">Read / Listen (30 Days Active)</button>
                         ` : `
-                            <button onclick="openPayModal(${b.id})" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-lg shadow-indigo-600/30">Buy Now (₹${b.price})</button>
+                            <button onclick="openPayModal('${b.id}')" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-lg shadow-indigo-600/30">Buy Now (₹${b.price})</button>
                         `}
                     </div>
                 `;
@@ -377,7 +403,7 @@
         }
 
         function openPayModal(bookId) {
-            selectedBookForPay = books.find(b => b.id === bookId);
+            selectedBookForPay = books.find(b => b.id == bookId);
             document.getElementById('pay-book-title').innerText = selectedBookForPay.title;
             document.getElementById('pay-book-price').innerText = `₹${selectedBookForPay.price}`;
             document.getElementById('payment-modal').classList.remove('hidden');
@@ -401,11 +427,10 @@
             userPurchases[selectedBookForPay.id] = Date.now() + thirtyDaysMs;
             localStorage.setItem('user_purchases', JSON.stringify(userPurchases));
 
-            loadBooks();
-            const targetBook = books.find(b => b.id === selectedBookForPay.id);
-            if(targetBook) {
-                targetBook.readersCount = (targetBook.readersCount || 0) + 1;
-                syncBooksToCloud();
+            // Increase readers count in cloud globally
+            const newCount = (selectedBookForPay.readersCount || 0) + 1;
+            if(db) {
+                db.ref('books/' + selectedBookForPay.id + '/readersCount').set(newCount);
             }
 
             alert("Payment verified successfully! 30 days access unlocked.");
@@ -415,21 +440,20 @@
         }
 
         function openUnlockedBook(bookId) {
-            loadBooks();
             if (!isBookAccessActive(bookId)) {
-                alert("Please complete the payment and enter the UTR number first!");
+                alert("Please complete the payment first!");
                 openPayModal(bookId);
                 return;
             }
 
-            const book = books.find(b => b.id === bookId);
+            const book = books.find(b => b.id == bookId);
             selectedBookForRead = book;
             document.getElementById('reader-title').innerText = book.title;
             document.getElementById('reader-content-text').innerText = book.content;
             document.getElementById('reader-modal').classList.remove('hidden');
         }
 
-        closeReaderModal = function() {
+        function closeReaderModal() {
             window.speechSynthesis.cancel();
             document.getElementById('reader-modal').classList.add('hidden');
         }

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="te">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -42,7 +42,7 @@
         <section id="owner-login-view" class="hidden max-w-md mx-auto bg-slate-900 p-6 md:p-8 rounded-3xl border border-slate-800 shadow-2xl space-y-6">
             <div class="text-center space-y-2">
                 <h2 class="text-2xl font-bold text-white">Owner Portal Login</h2>
-                <p class="text-xs text-slate-400">లాగిన్ వివరాలు ఎంటర్ చేయండి</p>
+                <p class="text-xs text-slate-400">Enter your secure credentials</p>
             </div>
 
             <form onsubmit="event.preventDefault(); handleOwnerLogin();" class="space-y-4" autocomplete="off">
@@ -66,20 +66,20 @@
             <div class="flex justify-between items-center border-b border-slate-800 pb-4">
                 <div>
                     <h2 class="text-2xl font-bold text-white">Owner Management Board</h2>
-                    <p class="text-xs text-slate-400">పుస్తకాలు అప్‌లోడ్ / డిలీట్ చేయండి & లైవ్ రీడర్స్ కౌంట్ చూడండి</p>
+                    <p class="text-xs text-slate-400">Upload / Delete books and view live readers count</p>
                 </div>
                 <button onclick="showCustomerView()" class="px-3 py-1.5 bg-red-500/20 text-red-400 text-xs font-bold rounded-lg border border-red-500/30">Exit Board</button>
             </div>
 
             <div class="bg-slate-900 p-6 rounded-3xl border border-slate-800 space-y-4">
                 <h3 class="text-lg font-bold text-indigo-400 flex items-center gap-2">
-                    <i data-lucide="plus-circle" class="w-5 h-5"></i> కొత్త పుస్తకం లైవ్ పబ్లిష్ చేయండి
+                    <i data-lucide="plus-circle" class="w-5 h-5"></i> Publish New Book Live
                 </h3>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-bold text-slate-300 mb-1">Book Title (పుస్తకం పేరు)</label>
-                        <input type="text" id="book-title" placeholder="ఉదా: AI విప్లవం" class="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm">
+                        <label class="block text-xs font-bold text-slate-300 mb-1">Book Title</label>
+                        <input type="text" id="book-title" placeholder="e.g. AI Revolution 2026" class="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-300 mb-1">Price (₹)</label>
@@ -99,17 +99,17 @@
                 </div>
 
                 <div>
-                    <label class="block text-xs font-bold text-slate-300 mb-1">Book Content (పుస్తక సారాంశం)</label>
-                    <textarea id="book-content" rows="4" placeholder="కంటెంట్ ఎంటర్ చేయండి..." class="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm"></textarea>
+                    <label class="block text-xs font-bold text-slate-300 mb-1">Book Content / Summary</label>
+                    <textarea id="book-content" rows="4" placeholder="Enter book content here..." class="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm"></textarea>
                 </div>
 
                 <button onclick="saveBook()" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 font-bold rounded-xl text-sm transition shadow-lg shadow-indigo-600/30">
-                    Publish Book Live (అందరికీ చూపించు)
+                    Publish Book Live (Sync to All Devices)
                 </button>
             </div>
 
             <div class="space-y-4">
-                <h3 class="text-lg font-bold text-white">అప్‌లోడ్ చేసిన పుస్తకాలు & రీడర్స్ కౌంట్</h3>
+                <h3 class="text-lg font-bold text-white">Published Books & Readers Count</h3>
                 <div id="owner-books-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
             </div>
         </section>
@@ -117,9 +117,9 @@
         <!-- CUSTOMER STORE VIEW -->
         <section id="customer-store-view" class="space-y-6">
             <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 flex justify-between items-center">
-                <span class="text-sm font-bold text-slate-200">E-Book Store (Live Sync)</span>
-                <button onclick="loadBooks(); alert('పుస్తకాలు రిఫ్రెష్ అయ్యాయి!');" class="px-3 py-1.5 bg-indigo-600/20 text-indigo-300 hover:bg-indigo-600/30 rounded-xl text-xs font-bold border border-indigo-500/30 flex items-center gap-1">
-                    <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Refresh
+                <span class="text-sm font-bold text-slate-200">E-Book Store (Cloud Live Sync)</span>
+                <button onclick="loadBooks(); alert('Books refreshed successfully!');" class="px-3 py-1.5 bg-indigo-600/20 text-indigo-300 hover:bg-indigo-600/30 rounded-xl text-xs font-bold border border-indigo-500/30 flex items-center gap-1">
+                    <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Refresh Books
                 </button>
             </div>
 
@@ -133,13 +133,13 @@
                 <h3 id="pay-book-title" class="text-lg font-bold text-white"></h3>
                 <div class="text-3xl font-extrabold text-emerald-400" id="pay-book-price"></div>
 
-                <p class="text-xs text-slate-400">Step 1: PhonePe లేదా GPay ద్వారా అమౌంట్ పే చేయండి.</p>
+                <p class="text-xs text-slate-400">Step 1: Pay the amount via PhonePe or GPay.</p>
                 <button onclick="openPhonePeApp()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2">
                     <i data-lucide="smartphone" class="w-4 h-4"></i> Open PhonePe / Pay Now
                 </button>
 
                 <div class="border-t border-slate-800 pt-3 text-left space-y-2">
-                    <label class="block text-[11px] font-bold text-slate-300">Step 2: 12-Digit UTR నంబర్ ఎంటర్ చేయండి:</label>
+                    <label class="block text-[11px] font-bold text-slate-300">Step 2: Enter 12-Digit UTR Number:</label>
                     <input type="text" id="utr-number" placeholder="Enter 12-digit UTR..." class="w-full p-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white">
                     <button onclick="verifyAndUnlock()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold">
                         Verify & Unlock (30 Days)
@@ -198,35 +198,34 @@
             document.addEventListener('keydown', (e) => {
                 if ((e.ctrlKey || e.metaKey) && (e.key === 'p' || e.key === 's' || e.key === 'u')) {
                     e.preventDefault();
-                    alert('Security Notice: Blocked!');
+                    alert('Security Notice: Action blocked!');
                 }
             });
         }
 
         function loadBooks() {
-            // LocalStorage బేస్డ్ గ్లోబల్ సింక్ కీ ఉపయోగించి అందరి మొబైల్స్‌లో డేటాను సమన్వయం చేస్తుంది
-            const cloudData = localStorage.getItem('global_shared_books');
+            const cloudData = localStorage.getItem('global_cloud_books_store');
             if (cloudData) {
                 books = JSON.parse(cloudData);
             } else {
                 books = [
                     {
                         id: 1,
-                        title: "AI భవిష్యత్తు కథలు 2026",
+                        title: "AI Future Stories 2026",
                         price: 199,
                         image: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=500",
                         upiId: "jayashankar9381@ybl",
-                        content: "ఇది AI టెక్నాలజీ భవిష్యత్తు గురించిన పుస్తకం. పేమెంట్ వెరిఫై అయిన తర్వాత 30 రోజుల పాటు అన్‌లాక్ అవుతుంది.",
+                        content: "This is a book about the future of AI technology. It unlocks for 30 days after payment verification.",
                         readersCount: 0
                     }
                 ];
-                localStorage.setItem('global_shared_books', JSON.stringify(books));
+                localStorage.setItem('global_cloud_books_store', JSON.stringify(books));
             }
             renderCustomerBooks();
         }
 
-        function syncBooks() {
-            localStorage.setItem('global_shared_books', JSON.stringify(books));
+        function syncBooksToCloud() {
+            localStorage.setItem('global_cloud_books_store', JSON.stringify(books));
         }
 
         function setupImageFileInput() {
@@ -269,7 +268,7 @@
                 document.getElementById('owner-dashboard-view').classList.remove('hidden');
                 renderOwnerBooks();
             } else {
-                alert("తప్పు వివరాలు!");
+                alert("Invalid Credentials!");
             }
         }
 
@@ -279,7 +278,7 @@
             const upiId = document.getElementById('book-upi-id').value.trim() || "jayashankar9381@ybl";
             const content = document.getElementById('book-content').value.trim();
 
-            if(!title || !price || !content) return alert("దయచేసి టైటిల్, ధర మరియు కంటెంట్ నింపండి!");
+            if(!title || !price || !content) return alert("Please fill title, price and content!");
 
             const newBook = {
                 id: Date.now(),
@@ -293,19 +292,19 @@
 
             loadBooks();
             books.push(newBook);
-            syncBooks();
+            syncBooksToCloud();
             resetForm();
             renderOwnerBooks();
-            alert("పుస్తకం విజయవంతంగా పబ్లిష్ చేయబడింది! కస్టమర్లందరికీ కనిపిస్తుంది.");
+            alert("Book published successfully! Now visible to all customers.");
         }
 
         function deleteBook(bookId) {
-            if(confirm("ఈ పుస్తకాన్ని ఖచ్చితంగా డిలీట్ చేయాలా?")) {
+            if(confirm("Are you sure you want to delete this book?")) {
                 loadBooks();
                 books = books.filter(b => b.id !== bookId);
-                syncBooks();
+                syncBooksToCloud();
                 renderOwnerBooks();
-                alert("పుస్తకం డిలీట్ చేయబడింది.");
+                alert("Book deleted successfully.");
             }
         }
 
@@ -322,7 +321,7 @@
             const list = document.getElementById('owner-books-list');
             list.innerHTML = "";
             if(books.length === 0) {
-                list.innerHTML = `<p class="text-xs text-slate-500">పుస్తకాలు ఏవీ లేవు.</p>`;
+                list.innerHTML = `<p class="text-xs text-slate-500">No books available.</p>`;
                 return;
             }
             books.forEach(b => {
@@ -333,7 +332,7 @@
                             <div>
                                 <h4 class="text-indigo-400 font-bold text-sm">${b.title}</h4>
                                 <p class="text-emerald-400 text-xs font-bold">₹${b.price}</p>
-                                <p class="text-[11px] text-slate-400 mt-1">📚 చదివినవారు: <b class="text-white">${b.readersCount || 0} మంది</b></p>
+                                <p class="text-[11px] text-slate-400 mt-1">📚 Readers: <b class="text-white">${b.readersCount || 0}</b></p>
                             </div>
                         </div>
                         <button onclick="deleteBook(${b.id})" class="px-3 py-1.5 bg-red-500/20 text-red-400 text-xs font-bold rounded-lg border border-red-500/30">Delete</button>
@@ -351,7 +350,7 @@
             const grid = document.getElementById('customer-books-grid');
             grid.innerHTML = "";
             if(books.length === 0) {
-                grid.innerHTML = `<p class="text-xs text-slate-400">ప్రస్తుతానికి ఎలాంటి పుస్తకాలు అందుబాటులో లేవు.</p>`;
+                grid.innerHTML = `<p class="text-xs text-slate-400">No books available at the moment.</p>`;
                 return;
             }
             books.forEach(b => {
@@ -364,13 +363,13 @@
                                 <h4 class="font-bold text-white text-base">${b.title}</h4>
                                 <span class="text-emerald-400 font-bold text-sm">₹${b.price}</span>
                             </div>
-                            <p class="text-[11px] text-slate-400">👥 చదివినవారు: <b class="text-indigo-400">${b.readersCount || 0} మంది</b></p>
+                            <p class="text-[11px] text-slate-400">👥 Readers: <b class="text-indigo-400">${b.readersCount || 0}</b></p>
                         </div>
 
                         ${hasAccess ? `
-                            <button onclick="openUnlockedBook(${b.id})" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-lg shadow-emerald-600/30">చదవండి (30 Days Active)</button>
+                            <button onclick="openUnlockedBook(${b.id})" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-lg shadow-emerald-600/30">Read / Listen (30 Days Active)</button>
                         ` : `
-                            <button onclick="openPayModal(${b.id})" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-lg shadow-indigo-600/30">కొనుగోలు చేయండి (₹${b.price})</button>
+                            <button onclick="openPayModal(${b.id})" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-lg shadow-indigo-600/30">Buy Now (₹${b.price})</button>
                         `}
                     </div>
                 `;
@@ -394,7 +393,7 @@
         function verifyAndUnlock() {
             const utr = document.getElementById('utr-number').value.trim();
             if(!utr || utr.length < 10) {
-                alert("దయచేసి సరైన UTR నంబర్ ఎంటర్ చేయండి!");
+                alert("Please enter a valid 12-digit UTR number!");
                 return;
             }
 
@@ -406,10 +405,10 @@
             const targetBook = books.find(b => b.id === selectedBookForPay.id);
             if(targetBook) {
                 targetBook.readersCount = (targetBook.readersCount || 0) + 1;
-                syncBooks();
+                syncBooksToCloud();
             }
 
-            alert("పేమెంట్ వెరిఫై అయింది! 30 రోజుల యాక్సెస్ అన్‌లాక్ చేయబడింది.");
+            alert("Payment verified successfully! 30 days access unlocked.");
             closePayModal();
             renderCustomerBooks();
             openUnlockedBook(selectedBookForPay.id);
@@ -418,7 +417,7 @@
         function openUnlockedBook(bookId) {
             loadBooks();
             if (!isBookAccessActive(bookId)) {
-                alert("ముందుగా అమౌంట్ పే చేసి UTR నంబర్ ఎంటర్ చేయండి!");
+                alert("Please complete the payment and enter the UTR number first!");
                 openPayModal(bookId);
                 return;
             }
@@ -430,7 +429,7 @@
             document.getElementById('reader-modal').classList.remove('hidden');
         }
 
-        function closeReaderModal() {
+        closeReaderModal = function() {
             window.speechSynthesis.cancel();
             document.getElementById('reader-modal').classList.add('hidden');
         }
@@ -441,7 +440,7 @@
                 document.getElementById('audio-status').innerText = "Audio Paused";
             } else {
                 const utterance = new SpeechSynthesisUtterance(selectedBookForRead.content);
-                utterance.lang = "te-IN";
+                utterance.lang = "en-US";
                 window.speechSynthesis.speak(utterance);
                 document.getElementById('audio-status').innerText = "Playing Audio...";
             }

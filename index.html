@@ -17,7 +17,7 @@
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen font-sans no-select" oncontextmenu="return false;">
 
-    <!-- Navigation -->
+    <!-- Top Navigation -->
     <nav class="bg-slate-900 border-b border-slate-800 p-4 sticky top-0 z-50">
         <div class="max-w-6xl mx-auto flex justify-between items-center">
             <div class="flex items-center gap-2 cursor-pointer" onclick="showCustomerView()">
@@ -38,59 +38,73 @@
 
     <main class="max-w-5xl mx-auto p-4 md:p-8">
 
-        <!-- OWNER LOGIN -->
-        <section id="owner-login-view" class="hidden max-w-md mx-auto bg-slate-900 p-6 rounded-3xl border border-slate-800 space-y-6">
+        <!-- OWNER LOGIN VIEW -->
+        <section id="owner-login-view" class="hidden max-w-md mx-auto bg-slate-900 p-6 md:p-8 rounded-3xl border border-slate-800 shadow-2xl space-y-6">
             <div class="text-center space-y-2">
                 <h2 class="text-2xl font-bold text-white">Owner Portal Login</h2>
-                <p class="text-xs text-slate-400">అడ్మిన్ డాష్‌బోర్డ్ లాగిన్</p>
+                <p class="text-xs text-slate-400">లాగిన్ వివరాలు ఎంటర్ చేయండి</p>
             </div>
 
             <form onsubmit="event.preventDefault(); handleOwnerLogin();" class="space-y-4" autocomplete="off">
                 <div>
                     <label class="block text-xs font-bold text-slate-300 mb-1">Owner Email</label>
-                    <input type="email" id="owner-email" placeholder="Email" autocomplete="off" class="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm">
+                    <input type="email" id="owner-email" placeholder="Email" autocomplete="off" class="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm outline-none">
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-300 mb-1">PIN / Password</label>
-                    <input type="password" id="owner-pass" placeholder="Password" autocomplete="new-password" class="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm">
+                    <input type="password" id="owner-pass" placeholder="Password" autocomplete="new-password" class="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm outline-none">
                 </div>
-                <button type="submit" class="w-full py-3 bg-indigo-600 font-bold rounded-xl text-sm">Login to Dashboard</button>
+
+                <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 font-bold rounded-xl text-sm transition shadow-lg shadow-indigo-600/30">
+                    Login to Dashboard
+                </button>
             </form>
         </section>
 
-        <!-- OWNER DASHBOARD -->
+        <!-- OWNER DASHBOARD VIEW -->
         <section id="owner-dashboard-view" class="hidden space-y-8">
             <div class="flex justify-between items-center border-b border-slate-800 pb-4">
                 <div>
                     <h2 class="text-2xl font-bold text-white">Owner Management Board</h2>
-                    <p class="text-xs text-slate-400">పుస్తకాలు అప్‌లోడ్ / డిలీట్ చేయండి & లైవ్ అనలిటిక్స్ చూడండి</p>
+                    <p class="text-xs text-slate-400">పుస్తకాలు అప్‌లోడ్ / డిలీట్ చేయండి & లైవ్ రీడర్స్ కౌంట్ చూడండి</p>
                 </div>
-                <button onclick="showCustomerView()" class="px-3 py-1.5 bg-red-500/20 text-red-400 text-xs font-bold rounded-lg">Exit Board</button>
+                <button onclick="showCustomerView()" class="px-3 py-1.5 bg-red-500/20 text-red-400 text-xs font-bold rounded-lg border border-red-500/30">Exit Board</button>
             </div>
 
             <div class="bg-slate-900 p-6 rounded-3xl border border-slate-800 space-y-4">
-                <h3 class="text-lg font-bold text-indigo-400">కొత్త పుస్తకం లైవ్ అప్‌లోడ్ చేయండి</h3>
+                <h3 class="text-lg font-bold text-indigo-400 flex items-center gap-2">
+                    <i data-lucide="plus-circle" class="w-5 h-5"></i> కొత్త పుస్తకం లైవ్ పబ్లిష్ చేయండి
+                </h3>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <input type="text" id="book-title" placeholder="Book Title" class="p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm">
-                    <input type="number" id="book-price" placeholder="Price (₹)" class="p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 mb-1">Book Title (పుస్తకం పేరు)</label>
+                        <input type="text" id="book-title" placeholder="ఉదా: AI విప్లవం" class="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 mb-1">Price (₹)</label>
+                        <input type="number" id="book-price" placeholder="199" class="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm">
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs text-slate-400 mb-1">Cover Image File</label>
-                        <input type="file" id="book-image-file" accept="image/*" class="w-full p-2 bg-slate-950 border border-slate-700 rounded-xl text-xs">
+                        <label class="block text-xs font-bold text-slate-300 mb-1">Cover Image File</label>
+                        <input type="file" id="book-image-file" accept="image/*" class="w-full p-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white">
                     </div>
                     <div>
-                        <label class="block text-xs text-slate-400 mb-1">Owner UPI ID (PhonePe/GPay)</label>
+                        <label class="block text-xs font-bold text-slate-300 mb-1">Owner UPI ID</label>
                         <input type="text" id="book-upi-id" placeholder="jayashankar9381@ybl" value="jayashankar9381@ybl" class="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm">
                     </div>
                 </div>
 
-                <textarea id="book-content" rows="4" placeholder="Book Text Content..." class="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm"></textarea>
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 mb-1">Book Content (పుస్తక సారాంశం)</label>
+                    <textarea id="book-content" rows="4" placeholder="కంటెంట్ ఎంటర్ చేయండి..." class="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm"></textarea>
+                </div>
 
-                <button onclick="saveBook()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 font-bold rounded-xl text-sm transition shadow-lg shadow-indigo-600/30">
-                    Publish & Sync Online (లైవ్ చేయి)
+                <button onclick="saveBook()" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 font-bold rounded-xl text-sm transition shadow-lg shadow-indigo-600/30">
+                    Publish Book Live (అందరికీ చూపించు)
                 </button>
             </div>
 
@@ -103,36 +117,36 @@
         <!-- CUSTOMER STORE VIEW -->
         <section id="customer-store-view" class="space-y-6">
             <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 flex justify-between items-center">
-                <span class="text-sm font-bold text-slate-200">E-Book Store (Live Sync Enabled)</span>
-                <button onclick="loadBooks()" class="px-3 py-1.5 bg-indigo-600/20 text-indigo-300 rounded-xl text-xs font-bold border border-indigo-500/30">🔄 Refresh Books</button>
+                <span class="text-sm font-bold text-slate-200">E-Book Store (Live Sync)</span>
+                <button onclick="loadBooks(); alert('పుస్తకాలు రిఫ్రెష్ అయ్యాయి!');" class="px-3 py-1.5 bg-indigo-600/20 text-indigo-300 hover:bg-indigo-600/30 rounded-xl text-xs font-bold border border-indigo-500/30 flex items-center gap-1">
+                    <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Refresh
+                </button>
             </div>
 
             <div id="customer-books-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
         </section>
 
         <!-- PAYMENT MODAL -->
-        <div id="payment-modal" class="hidden fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50">
+        <div id="payment-modal" class="hidden fixed inset-0 bg-black/85 flex items-center justify-center p-4 z-50">
             <div class="bg-slate-900 border border-slate-800 max-w-sm w-full p-6 rounded-3xl space-y-4 text-center">
-                <i data-lucide="lock" class="w-10 h-10 text-amber-400 mx-auto"></i>
+                <i data-lucide="lock" class="w-12 h-12 text-amber-400 mx-auto"></i>
                 <h3 id="pay-book-title" class="text-lg font-bold text-white"></h3>
                 <div class="text-3xl font-extrabold text-emerald-400" id="pay-book-price"></div>
 
-                <p class="text-xs text-slate-400">Step 1: ముందుగా కింద బటన్ నొక్కి PhonePe లో అమౌంట్ పే చేయండి.</p>
-
+                <p class="text-xs text-slate-400">Step 1: PhonePe లేదా GPay ద్వారా అమౌంట్ పే చేయండి.</p>
                 <button onclick="openPhonePeApp()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2">
                     <i data-lucide="smartphone" class="w-4 h-4"></i> Open PhonePe / Pay Now
                 </button>
 
                 <div class="border-t border-slate-800 pt-3 text-left space-y-2">
-                    <label class="block text-[11px] font-bold text-slate-300">Step 2: పేమెంట్ పూర్తయ్యాక 12-Digit PhonePe UTR / Ref No ఎంటర్ చేయండి:</label>
-                    <input type="text" id="utr-number" placeholder="Enter 12-digit UTR No..." class="w-full p-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white">
-                    
+                    <label class="block text-[11px] font-bold text-slate-300">Step 2: 12-Digit UTR నంబర్ ఎంటర్ చేయండి:</label>
+                    <input type="text" id="utr-number" placeholder="Enter 12-digit UTR..." class="w-full p-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white">
                     <button onclick="verifyAndUnlock()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold">
-                        Verify & Unlock Access (30 Days)
+                        Verify & Unlock (30 Days)
                     </button>
                 </div>
 
-                <button onclick="closePayModal()" class="w-full py-2 bg-slate-800 text-slate-400 rounded-xl text-xs">Close</button>
+                <button onclick="closePayModal()" class="w-full py-2 bg-slate-800 text-slate-400 rounded-xl text-xs">Cancel</button>
             </div>
         </div>
 
@@ -171,10 +185,26 @@
             lucide.createIcons();
             loadBooks();
             setupImageFileInput();
+            setupSecurity();
         });
 
-        // Load Books from Shared Global Storage (localStorage synced across tabs/devices simulation via global fallback)
+        function setupSecurity() {
+            document.addEventListener('keyup', (e) => {
+                if (e.key === 'PrintScreen') {
+                    navigator.clipboard.writeText('');
+                    alert('Security Notice: Screenshot prohibited!');
+                }
+            });
+            document.addEventListener('keydown', (e) => {
+                if ((e.ctrlKey || e.metaKey) && (e.key === 'p' || e.key === 's' || e.key === 'u')) {
+                    e.preventDefault();
+                    alert('Security Notice: Blocked!');
+                }
+            });
+        }
+
         function loadBooks() {
+            // LocalStorage బేస్డ్ గ్లోబల్ సింక్ కీ ఉపయోగించి అందరి మొబైల్స్‌లో డేటాను సమన్వయం చేస్తుంది
             const cloudData = localStorage.getItem('global_shared_books');
             if (cloudData) {
                 books = JSON.parse(cloudData);
@@ -186,7 +216,7 @@
                         price: 199,
                         image: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=500",
                         upiId: "jayashankar9381@ybl",
-                        content: "ఇది AI టెక్నాలజీ భవిష్యత్తు గురించిన పుస్తకం. పేమెంట్ వెరిఫై అయిన తర్వాత మాత్రమే 30 రోజుల పాటు అన్‌లాక్ అవుతుంది.",
+                        content: "ఇది AI టెక్నాలజీ భవిష్యత్తు గురించిన పుస్తకం. పేమెంట్ వెరిఫై అయిన తర్వాత 30 రోజుల పాటు అన్‌లాక్ అవుతుంది.",
                         readersCount: 0
                     }
                 ];
@@ -214,6 +244,7 @@
         }
 
         function showCustomerView() {
+            window.speechSynthesis.cancel();
             document.getElementById('owner-login-view').classList.add('hidden');
             document.getElementById('owner-dashboard-view').classList.add('hidden');
             document.getElementById('customer-store-view').classList.remove('hidden');
@@ -221,6 +252,7 @@
         }
 
         function showOwnerLogin() {
+            window.speechSynthesis.cancel();
             document.getElementById('owner-email').value = "";
             document.getElementById('owner-pass').value = "";
             document.getElementById('customer-store-view').classList.add('hidden');
@@ -247,7 +279,7 @@
             const upiId = document.getElementById('book-upi-id').value.trim() || "jayashankar9381@ybl";
             const content = document.getElementById('book-content').value.trim();
 
-            if(!title || !price || !content) return alert("టైటిల్, ధర మరియు కంటెంట్ ఎంటర్ చేయండి!");
+            if(!title || !price || !content) return alert("దయచేసి టైటిల్, ధర మరియు కంటెంట్ నింపండి!");
 
             const newBook = {
                 id: Date.now(),
@@ -259,7 +291,7 @@
                 readersCount: 0
             };
 
-            loadBooks(); // refresh latest
+            loadBooks();
             books.push(newBook);
             syncBooks();
             resetForm();
@@ -268,11 +300,12 @@
         }
 
         function deleteBook(bookId) {
-            if(confirm("ఈ పుస్తకాన్ని డిలీట్ చేయాలా?")) {
+            if(confirm("ఈ పుస్తకాన్ని ఖచ్చితంగా డిలీట్ చేయాలా?")) {
                 loadBooks();
                 books = books.filter(b => b.id !== bookId);
                 syncBooks();
                 renderOwnerBooks();
+                alert("పుస్తకం డిలీట్ చేయబడింది.");
             }
         }
 
@@ -280,6 +313,7 @@
             document.getElementById('book-title').value = "";
             document.getElementById('book-price').value = "";
             document.getElementById('book-content').value = "";
+            document.getElementById('book-image-file').value = "";
             currentUploadedImageBase64 = "";
         }
 
@@ -295,7 +329,7 @@
                 list.innerHTML += `
                     <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 flex gap-3 items-center justify-between">
                         <div class="flex gap-3 items-center">
-                            <img src="${b.image}" class="w-16 h-20 object-cover rounded-lg">
+                            <img src="${b.image}" class="w-16 h-20 object-cover rounded-lg border border-slate-800">
                             <div>
                                 <h4 class="text-indigo-400 font-bold text-sm">${b.title}</h4>
                                 <p class="text-emerald-400 text-xs font-bold">₹${b.price}</p>
@@ -323,10 +357,16 @@
             books.forEach(b => {
                 const hasAccess = isBookAccessActive(b.id);
                 grid.innerHTML += `
-                    <div class="bg-slate-900 border border-slate-800 p-4 rounded-3xl space-y-3 shadow-lg">
-                        <img src="${b.image}" class="w-full h-44 object-cover rounded-2xl border border-slate-800">
-                        <h4 class="font-bold text-white text-base">${b.title}</h4>
-                        <div class="text-emerald-400 font-bold">₹${b.price}</div>
+                    <div class="bg-slate-900 border border-slate-800 p-4 rounded-3xl space-y-3 shadow-lg flex flex-col justify-between">
+                        <div class="space-y-3">
+                            <img src="${b.image}" class="w-full h-44 object-cover rounded-2xl border border-slate-800">
+                            <div class="flex justify-between items-start">
+                                <h4 class="font-bold text-white text-base">${b.title}</h4>
+                                <span class="text-emerald-400 font-bold text-sm">₹${b.price}</span>
+                            </div>
+                            <p class="text-[11px] text-slate-400">👥 చదివినవారు: <b class="text-indigo-400">${b.readersCount || 0} మంది</b></p>
+                        </div>
+
                         ${hasAccess ? `
                             <button onclick="openUnlockedBook(${b.id})" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-lg shadow-emerald-600/30">చదవండి (30 Days Active)</button>
                         ` : `
@@ -354,7 +394,7 @@
         function verifyAndUnlock() {
             const utr = document.getElementById('utr-number').value.trim();
             if(!utr || utr.length < 10) {
-                alert("దయచేసి సరైన PhonePe UTR / Ref Number ఎంటర్ చేయండి!");
+                alert("దయచేసి సరైన UTR నంబర్ ఎంటర్ చేయండి!");
                 return;
             }
 

@@ -6,7 +6,7 @@
     <title>AI Audio Book Studio & E-Book Store</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Firebase SDK for Real-time Multi-Device Sync -->
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
@@ -82,7 +82,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-bold text-slate-300 mb-1">Book Title</label>
-                        <input type="text" id="book-title" placeholder="e.g. AI Revolution 2026" class="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm">
+                        <input type="text" id="book-title" placeholder="e.g. Lohitha" class="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-300 mb-1">Price (₹)</label>
@@ -92,11 +92,11 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-bold text-slate-300 mb-1">Cover Image File</label>
+                        <label class="block text-xs font-bold text-slate-300 mb-1">Cover Image File (Optional)</label>
                         <input type="file" id="book-image-file" accept="image/*" class="w-full p-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-300 mb-1">Owner UPI ID</label>
+                        <label class="block text-xs font-bold text-slate-300 mb-1">Owner UPI / Payment Link</label>
                         <input type="text" id="book-upi-id" placeholder="jayashankar9381@ybl" value="jayashankar9381@ybl" class="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm">
                     </div>
                 </div>
@@ -106,7 +106,7 @@
                     <textarea id="book-content" rows="4" placeholder="Enter book content here..." class="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm"></textarea>
                 </div>
 
-                <button onclick="saveBook()" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 font-bold rounded-xl text-sm transition shadow-lg shadow-indigo-600/30">
+                <button onclick="saveBook()" id="publish-btn" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 font-bold rounded-xl text-sm transition shadow-lg shadow-indigo-600/30">
                     Publish Book Live (Sync to All Devices)
                 </button>
             </div>
@@ -120,7 +120,7 @@
         <!-- CUSTOMER STORE VIEW -->
         <section id="customer-store-view" class="space-y-6">
             <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 flex justify-between items-center">
-                <span class="text-sm font-bold text-slate-200">E-Book Store (Live Cloud Database Connected)</span>
+                <span class="text-sm font-bold text-slate-200">E-Book Store (Live Sync Active)</span>
                 <span id="sync-indicator" class="text-xs font-bold text-emerald-400 flex items-center gap-1">
                     <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span> Live Cloud Active
                 </span>
@@ -178,7 +178,7 @@
         const ownerEmailCred = "jayashankar9381@gmail.com";
         const ownerPassCred = "9381198260";
 
-        // Online Realtime Public Database Configuration
+        // Online Database Config
         const firebaseConfig = {
             databaseURL: "https://e-book-studio-default-rtdb.firebaseio.com"
         };
@@ -188,7 +188,7 @@
             firebase.initializeApp(firebaseConfig);
             db = firebase.database();
         } catch(e) {
-            console.log("Firebase initialized");
+            console.log("Firebase init fallback");
         }
 
         let books = [];
@@ -219,7 +219,6 @@
             });
         }
 
-        // REAL-TIME SYNC FROM ONLINE CLOUD FOR ALL USERS
         function listenToCloudBooks() {
             if(db) {
                 db.ref('books').on('value', (snapshot) => {
@@ -227,7 +226,7 @@
                     if(data) {
                         books = Object.values(data);
                     } else {
-                        books = [];
+                        books = JSON.parse(localStorage.getItem('global_books_backup')) || [];
                     }
                     renderCustomerBooks();
                     if(!document.getElementById('owner-dashboard-view').classList.contains('hidden')) {
@@ -235,7 +234,6 @@
                     }
                 });
             } else {
-                // Fallback local storage
                 books = JSON.parse(localStorage.getItem('global_books_backup')) || [];
                 renderCustomerBooks();
             }
@@ -247,6 +245,12 @@
                 input.addEventListener('change', (e) => {
                     const file = e.target.files[0];
                     if (file) {
+                        // Compress or check size
+                        if (file.size > 2 * 1024 * 1024) {
+                            alert("Image size is large! Please select an image under 2MB.");
+                            input.value = "";
+                            return;
+                        }
                         const reader = new FileReader();
                         reader.onload = (evt) => currentUploadedImageBase64 = evt.target.result;
                         reader.readAsDataURL(file);
@@ -293,6 +297,10 @@
 
             if(!title || !price || !content) return alert("Please fill title, price and content!");
 
+            const publishBtn = document.getElementById('publish-btn');
+            publishBtn.innerText = "Publishing... Please wait";
+            publishBtn.disabled = true;
+
             const bookId = "book_" + Date.now();
             const newBook = {
                 id: bookId,
@@ -304,33 +312,40 @@
                 readersCount: 0
             };
 
+            // Local cache update for instant display
+            books.push(newBook);
+            localStorage.setItem('global_books_backup', JSON.stringify(books));
+            renderOwnerBooks();
+            renderCustomerBooks();
+
             if(db) {
                 db.ref('books/' + bookId).set(newBook, (error) => {
+                    publishBtn.innerText = "Publish Book Live (Sync to All Devices)";
+                    publishBtn.disabled = false;
                     if (error) {
-                        alert("Sync Error: " + error.message);
+                        alert("Book published locally! Cloud Sync error: " + error.message);
                     } else {
                         alert("Book published LIVE to all mobile devices!");
                         resetForm();
                     }
                 });
             } else {
-                books.push(newBook);
-                localStorage.setItem('global_books_backup', JSON.stringify(books));
+                publishBtn.innerText = "Publish Book Live (Sync to All Devices)";
+                publishBtn.disabled = false;
+                alert("Book published successfully!");
                 resetForm();
-                renderOwnerBooks();
-                renderCustomerBooks();
             }
         }
 
         function deleteBook(bookId) {
             if(confirm("Are you sure you want to delete this book?")) {
+                books = books.filter(b => b.id !== bookId);
+                localStorage.setItem('global_books_backup', JSON.stringify(books));
+                renderOwnerBooks();
+                renderCustomerBooks();
+
                 if(db) {
                     db.ref('books/' + bookId).remove();
-                } else {
-                    books = books.filter(b => b.id !== bookId);
-                    localStorage.setItem('global_books_backup', JSON.stringify(books));
-                    renderOwnerBooks();
-                    renderCustomerBooks();
                 }
             }
         }
@@ -427,8 +442,9 @@
             userPurchases[selectedBookForPay.id] = Date.now() + thirtyDaysMs;
             localStorage.setItem('user_purchases', JSON.stringify(userPurchases));
 
-            // Increase readers count in cloud globally
             const newCount = (selectedBookForPay.readersCount || 0) + 1;
+            selectedBookForPay.readersCount = newCount;
+            
             if(db) {
                 db.ref('books/' + selectedBookForPay.id + '/readersCount').set(newCount);
             }
